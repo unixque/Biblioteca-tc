@@ -34,12 +34,13 @@ function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => {
     // Scroll window (for standalone pages like Login/Signup)
-    window.scrollTo({ top: 0, behavior: 'instant' })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
     
     // Scroll the main content area (for DashboardLayout pages)
-    const mainContent = document.querySelector('main')
-    if (mainContent) {
-      mainContent.scrollTo({ top: 0, behavior: 'instant' })
+    // We target the container with .custom-scrollbar as defined in DashboardLayout.jsx
+    const scrollContainer = document.querySelector('.custom-scrollbar')
+    if (scrollContainer) {
+      scrollContainer.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }, [pathname])
   return null
