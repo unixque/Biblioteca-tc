@@ -1,24 +1,25 @@
 import { useState, useEffect, useRef } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
-import { Book, ChevronLeft, Sparkles, CheckCircle2, MessageSquare, Star, Edit, Trash2 } from 'lucide-react'
+import { Book } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { useNotification } from '../context/NotificationContext'
+import { useLibraryData } from '../context/LibraryDataContext'
+import { setBook as cacheSetBook } from '../lib/libraryCache'
 import { notifyUser } from '../lib/sendEmail'
 import StarRating from '../components/StarRating'
-import { clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-function cn(...inputs) {
-  return twMerge(clsx(inputs))
-}
+import Button from '../components/ui/Button'
+import MaterialIcon from '../components/ui/MaterialIcon'
+import { cn } from '../lib/cn'
 
 const BookDetails = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, isAdmin, loading: authLoading } = useAuth()
+  const { getBookById, fetchBookById, invalidateCatalog, invalidateBook } = useLibraryData()
   const { t, translateCategory } = useLanguage()
   const { showToast, confirm } = useNotification()
   const [book, setBook] = useState(null)
@@ -36,19 +37,19 @@ const BookDetails = () => {
   const fetchInProgress = useRef(false)
   const lastFetchTime = useRef(0)
 
-  const getCoverUrl = (filename) => {
-    if (!filename) return null
-    return supabase.storage.from('capalivro').getPublicUrl(filename).data.publicUrl
-  }
-
   useEffect(() => {
-    if (authLoading) return
-    fetchBook()
-  }, [id, authLoading])
+    const fromState = location.state?.book
+    const cached = fromState || getBookById(id)
+    if (cached && String(cached.id) === String(id)) {
+      setBook(cached)
+      setLoading(false)
+    }
+    fetchBook(Boolean(cached))
+  }, [id])
 
   useEffect(() => {
     const checkUserLoan = async () => {
-      if (!user) return
+      if (!user || authLoading) return
       const { data } = await supabase
         .from('loans')
         .select('id')
@@ -60,7 +61,7 @@ const BookDetails = () => {
       setUserHasLoan(data && data.length > 0)
     }
     checkUserLoan()
-  }, [user, id])
+  }, [user, id, authLoading])
 
   useEffect(() => {
     if (user && reviews.length > 0) {
@@ -72,55 +73,52 @@ const BookDetails = () => {
     }
   }, [user, reviews])
 
-  useRefreshOnFocus(() => fetchBook())
+  useRefreshOnFocus(() => fetchBook(true))
 
-  const fetchBook = async (retryCount = 0) => {
+  const fetchReviews = async () => {
+    const { data: reviewsData } = await supabase
+      .from('reviews')
+      .select('*, profiles(name)')
+      .eq('book_id', id)
+      .order('created_at', { ascending: false })
+    setReviews(reviewsData || [])
+  }
+
+  const fetchBook = async (hasCachedBook = false, retryCount = 0) => {
     const now = Date.now()
 
-    // Deadlock breaker: if a fetch claims to be in progress for > 15 seconds, assume it hung
     if (fetchInProgress.current && now - lastFetchTime.current > 15000) {
-      console.warn('[BookDetails] Fetch lock exceeded 15s. Breaking deadlock.')
       fetchInProgress.current = false
     }
 
-    if (authLoading || fetchInProgress.current || (retryCount === 0 && now - lastFetchTime.current < 2000)) {
-      setLoading(false)
+    if (
+      fetchInProgress.current ||
+      (retryCount === 0 && now - lastFetchTime.current < 2000 && !hasCachedBook)
+    ) {
+      if (hasCachedBook) await fetchReviews()
       return
     }
+
+    if (!hasCachedBook) setLoading(true)
 
     fetchInProgress.current = true
     lastFetchTime.current = now
 
-    if (!book) {
-      setLoading(true)
-    }
-
     try {
-      const { data, error } = await supabase
-        .from('books')
-        .select('*, categories(name)')
-        .eq('id', id)
-        .single()
-
-      if (error) throw error
-
-      const { data: reviewsData } = await supabase
-        .from('reviews')
-        .select('*, profiles(name)')
-        .eq('book_id', id)
-        .order('created_at', { ascending: false })
-
-      setReviews(reviewsData || [])
-
-      setBook({ ...data, category_name: data.categories?.name, cover_url: getCoverUrl(data.cover_image) })
+      const [data] = await Promise.all([
+        fetchBookById(id, { force: !hasCachedBook }),
+        fetchReviews(),
+      ])
+      if (data) {
+        setBook(data)
+        cacheSetBook(id, data)
+      }
     } catch (error) {
       console.warn('[BookDetails] Fetch failed:', error.message || error)
-
       if (retryCount < 1) {
-        console.log('[BookDetails] Retrying in 1.5s...')
         fetchInProgress.current = false
-        await new Promise(r => setTimeout(r, 1500))
-        return fetchBook(retryCount + 1)
+        await new Promise((r) => setTimeout(r, 1500))
+        return fetchBook(hasCachedBook, retryCount + 1)
       }
     } finally {
       setLoading(false)
@@ -179,7 +177,11 @@ const BookDetails = () => {
     if (error) {
       showToast('Erro ao actualizar destaque', 'danger')
     } else {
-      setBook(prev => ({ ...prev, is_featured: newVal }))
+      const updated = { ...book, is_featured: newVal }
+      setBook(updated)
+      cacheSetBook(id, updated)
+      invalidateBook(id)
+      invalidateCatalog()
       showToast(newVal ? 'Livro marcado como destaque ⭐' : 'Destaque removido', 'success')
     }
   }
@@ -211,7 +213,7 @@ const BookDetails = () => {
       }
 
       // Refresh the page data
-      await fetchBook()
+      await fetchBook(true)
       setShowReviewForm(false)
       showToast(t('bookDetails.reviewSuccess'), 'success')
     } catch (err) {
@@ -273,21 +275,27 @@ const BookDetails = () => {
     }
   }
 
-  if (loading) return (
-    <div className="animate-pulse space-y-8 max-w-4xl mx-auto py-12">
-      <div className="h-5 w-20 bg-bg-surface rounded-lg" />
-      <div className="bg-bg-surface rounded-[2.5rem] h-[500px] shadow-sm" />
+  if (loading && !book) return (
+    <div className="animate-pulse page-stack max-w-container-max mx-auto w-full">
+      <div className="h-4 w-48 bg-surface-container rounded-none mb-8" />
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+        <div className="md:col-span-4 aspect-[3/4] bg-surface-container rounded-lg" />
+        <div className="md:col-span-8 space-y-4">
+          <div className="h-10 w-3/4 bg-surface-container rounded-none" />
+          <div className="h-24 bg-surface-container rounded-lg" />
+        </div>
+      </div>
     </div>
   )
 
   if (!book) return (
-    <div className="py-20 text-center space-y-5">
-      <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto text-primary opacity-30">
+    <div className="py-12 text-center space-y-5 card-padding">
+      <div className="w-16 h-16 bg-secondary-container flex items-center justify-center mx-auto text-primary opacity-30">
         <Book size={32} />
       </div>
-      <h2 className="text-xl font-semibold text-text-main">{t('bookDetails.bookNotFound')}</h2>
-      <Link to="/" className="text-primary hover:underline inline-flex items-center gap-1.5 text-sm font-medium">
-        <ChevronLeft size={16} /> {t('bookDetails.backToStart')}
+      <h2 className="text-headline-sm text-on-surface">{t('bookDetails.bookNotFound')}</h2>
+      <Link to="/catalogo" className="text-primary hover:underline inline-flex items-center gap-1.5 text-label-sm">
+        <MaterialIcon name="chevron_left" size={16} /> {t('bookDetails.backToStart')}
       </Link>
     </div>
   )
@@ -296,275 +304,314 @@ const BookDetails = () => {
     ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
     : 0
 
+  const isAvailable = book.available_qty > 0
+  const initials = (name) => {
+    const parts = (name || 'U').trim().split(/\s+/)
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+    return (name || 'U').substring(0, 2).toUpperCase()
+  }
+
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 space-y-6">
-      <Link to="/" className="inline-flex items-center gap-1.5 text-text-muted hover:text-primary text-sm font-medium transition-colors">
-        <ChevronLeft size={18} /> {t('bookDetails.backToCatalog')}
-      </Link>
+    <div className="max-w-container-max mx-auto w-full page-stack">
+      {/* Breadcrumbs */}
+      <nav className="flex items-center gap-2 text-secondary flex-wrap mb-8">
+        <Link to="/landing" className="text-label-sm hover:text-primary transition-colors">
+          INÍCIO
+        </Link>
+        <MaterialIcon name="chevron_right" size={14} />
+        <Link to="/catalogo" className="text-label-sm hover:text-primary transition-colors">
+          CATÁLOGO
+        </Link>
+        <MaterialIcon name="chevron_right" size={14} />
+        <span className="text-label-sm text-on-surface truncate max-w-[200px] sm:max-w-none">
+          {book.title.toUpperCase()}
+        </span>
+      </nav>
 
-      {/* Main Detail Card */}
-      <div className="bg-[#0a1629] rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col items-center py-12 px-8 text-center text-white relative">
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-
-        {/* Book Cover */}
-        <div className="w-44 aspect-[3/4] rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-8 transform hover:scale-105 transition-transform duration-500">
-          <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
-        </div>
-
-        {/* Title & Author */}
-        <div className="space-y-4 mb-10 max-w-2xl">
-          <div>
-            <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight leading-tight">{book.title}</h1>
-            <p className="text-white/50 font-normal mt-2">{book.author}</p>
-          </div>
-
-          <div className="flex items-center justify-center gap-3">
-            <StarRating rating={averageRating} size={18} />
-            <span className="text-white/70 text-sm font-medium">
-              {averageRating > 0 ? averageRating.toFixed(1) : t('bookDetails.noReviews')}
-              {reviews.length > 0 && ` (${reviews.length})`}
-            </span>
-          </div>
-
-          {book.category_name && (
-            <span className="inline-block mt-2 px-3 py-1 bg-white/10 rounded-full text-xs text-white/60 font-medium">
-              {translateCategory(book.category_name)}
-            </span>
-          )}
-        </div>
-
-        {/* Action Button */}
-        <div className="flex flex-col items-center gap-3 w-full max-w-xs mb-10">
-          {requestStatus === 'success' || userHasLoan ? (
-            <div className="bg-primary/20 border border-primary/30 py-3.5 px-8 rounded-2xl w-full text-primary font-bold shadow-inner flex flex-col items-center justify-center gap-1 text-sm">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 size={18} /> {userHasLoan && requestStatus !== 'success' ? 'Já Requisitado' : t('bookDetails.requestedSuccess')}
-              </div>
-              <span className="text-[10px] text-primary/70 font-medium">Aguardando aprovação do administrador</span>
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter mb-section-gap">
+        {/* Cover column */}
+        <div className="md:col-span-4 self-start">
+          <div className="relative w-full group">
+            <div className="aspect-[3/4] rounded-lg overflow-hidden book-shadow border border-outline-variant bg-surface-container relative z-10">
+              <img
+                src={book.cover_url}
+                alt={book.title}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-primary opacity-[0.02] mix-blend-multiply pointer-events-none" />
             </div>
-          ) : (
-            <button
-              onClick={handleLoan}
-              disabled={isRequesting || book.available_qty <= 0}
-              className="w-full bg-primary text-white py-3.5 rounded-2xl font-bold tracking-wide shadow-xl shadow-primary/20 hover:bg-primary/90 hover:-translate-y-0.5 transition-all active:translate-y-0 active:scale-95 flex items-center justify-center gap-2.5 disabled:opacity-40 disabled:grayscale disabled:hover:translate-y-0 disabled:active:scale-100 text-sm"
-            >
-              {isRequesting ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <><Book size={18} /> {book.available_qty <= 0 ? t('bookDetails.outOfStock') : t('bookDetails.requestBook')}</>
-              )}
-            </button>
-          )}
-          <p className="text-[11px] text-white/30 font-semibold tracking-wider uppercase">
-            {t('bookDetails.availableOf').replace('{available}', book.available_qty).replace('{total}', book.quantity)}
-          </p>
-        </div>
-
-        {/* Admin Action Bar */}
-        {isAdmin && (
-          <div className="flex items-center justify-center gap-3 w-full max-w-xs mb-10">
-            <button
-              onClick={handleToggleFeatured}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-bold border transition-all",
-                book.is_featured
-                  ? "bg-yellow-500/20 border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/30"
-                  : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white"
-              )}
-            >
-              <Star size={15} fill={book.is_featured ? 'currentColor' : 'none'} />
-              {book.is_featured ? 'Destacado' : 'Destacar'}
-            </button>
-            <Link
-              to={`/console/livros?q=${encodeURIComponent(book.title)}`}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-2xl text-sm font-bold border bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white transition-all"
-            >
-              <Edit size={15} />
-              Editar
-            </Link>
-          </div>
-        )}
-
-        {/* Stats */}
-        <div className="w-full max-w-md space-y-6">
-          <div className="h-px bg-white/10" />
-          <div className="flex items-center justify-center">
-            <div className="space-y-1">
-              <p className="text-[10px] text-white/40 uppercase font-medium tracking-widest">{t('bookDetails.yearEdition')}</p>
-              <p className="text-lg font-semibold">{book.year_edition || '—'}</p>
+            <div className="absolute -bottom-4 -left-4 right-4 top-4 bg-surface-container-high rounded-lg z-0 border border-outline-variant" />
+            {isAdmin && (
+            <div className="absolute top-4 right-4 flex gap-2 z-20">
+              <Link
+                to={`/console/livros?q=${encodeURIComponent(book.title)}`}
+                className="bg-surface/90 backdrop-blur p-2 rounded-full shadow-md text-on-surface-variant hover:text-primary transition-colors border border-outline-variant"
+                title="Editar"
+              >
+                <MaterialIcon name="edit" size={20} />
+              </Link>
+              <button
+                type="button"
+                onClick={handleToggleFeatured}
+                className={cn(
+                  'bg-surface/90 backdrop-blur p-2 rounded-full shadow-md border border-outline-variant transition-colors',
+                  book.is_featured ? 'text-secondary' : 'text-on-surface-variant hover:text-secondary'
+                )}
+                title={book.is_featured ? 'Remover destaque' : 'Destacar'}
+              >
+                <MaterialIcon name="star" size={20} filled={book.is_featured} />
+              </button>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Summary Section */}
-      <div className="bg-bg-surface rounded-[2rem] p-8 shadow-sm border border-border/30 space-y-4">
-        <div className="flex items-center gap-2.5 text-text-main">
-          <Sparkles size={18} className="text-primary" />
-          <h3 className="text-lg font-semibold">{t('bookDetails.aboutBook')}</h3>
-          {book.ai_summary && (
-            <span className="ml-auto text-[10px] font-medium text-primary/60 bg-primary/8 px-2 py-1 rounded-full uppercase tracking-wider">{t('bookDetails.aiSummary')}</span>
-          )}
-        </div>
-        <p className="text-text-muted leading-relaxed text-sm font-normal">
-          {book.ai_summary || book.description || t('bookDetails.noDescription')}
-        </p>
-
-        {summaryError && (
-          <p className="text-red-400 text-xs font-normal bg-red-500/8 border border-red-400/20 rounded-xl px-4 py-3">{summaryError}</p>
-        )}
-
-        {!book.ai_summary && (
-          <button
-            onClick={handleGenerateSummary}
-            disabled={isGeneratingSummary}
-            className="flex items-center gap-1.5 text-primary font-medium text-sm hover:underline disabled:opacity-50"
-          >
-            {isGeneratingSummary ? (
-              <div className="w-3.5 h-3.5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-            ) : (
-              <Sparkles size={14} />
             )}
-            {isGeneratingSummary ? t('bookDetails.generatingAiSummary') : t('bookDetails.generateAiSummary')}
-          </button>
-        )}
-      </div>
-
-      {/* Details Grid */}
-      <div className="w-full">
-        <div className="bg-bg-surface p-7 rounded-[2rem] shadow-sm border border-border/30 space-y-4">
-          <p className="text-xs font-medium text-text-muted uppercase tracking-wider">{t('bookDetails.bookMetadata')}</p>
-          <div className="space-y-2">
-            {[
-              { label: t('bookDetails.isbn'), value: book.isbn },
-              { label: t('bookDetails.publisher'), value: book.publisher },
-              { label: t('bookDetails.yearEdition'), value: book.year_edition }
-            ].map(({ label, value }) => (
-              <div key={label} className="flex justify-between items-center py-2.5 border-b border-border/20 last:border-0">
-                <span className="text-text-muted text-sm font-normal">{label}</span>
-                <span className="text-sm font-medium text-text-main">{value || '—'}</span>
-              </div>
-            ))}
           </div>
+        </div>
+
+        {/* Content column */}
+        <div className="md:col-span-8 flex flex-col justify-center md:pl-8 mt-8 md:mt-0">
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
+            {book.category_name && (
+              <span className="inline-flex items-center px-3 py-1 rounded-none bg-secondary-container text-on-secondary-container text-label-sm border border-secondary">
+                {translateCategory(book.category_name).toUpperCase()}
+              </span>
+            )}
+            <div className="flex items-center gap-1 text-secondary ml-auto">
+              <MaterialIcon name="star" size={18} filled />
+              <span className="text-label-sm">
+                {averageRating > 0 ? averageRating.toFixed(1) : '—'} ({reviews.length} {reviews.length === 1 ? 'review' : 'reviews'})
+              </span>
+            </div>
+          </div>
+
+          <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface mb-2">{book.title}</h1>
+          <p className="text-headline-sm text-on-surface-variant italic mb-6">{book.author}</p>
+
+          {/* Glass availability panel */}
+          <div className="glass-panel p-6 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-6 mb-12">
+            <div className="flex items-center gap-4">
+              <div
+                className={cn(
+                  'w-3 h-3 rounded-full shrink-0',
+                  isAvailable ? 'bg-tertiary animate-pulse' : 'bg-error'
+                )}
+              />
+              <div>
+                <p className="text-label-sm text-secondary tracking-widest mb-1">DISPONIBILIDADE</p>
+                <p className="text-body-lg text-on-surface font-medium">
+                  {isAvailable
+                    ? 'Disponível para requisição'
+                    : t('bookDetails.outOfStock')}
+                </p>
+                <p className="text-[12px] text-on-surface-variant">
+                  {t('bookDetails.availableOf')
+                    .replace('{available}', book.available_qty)
+                    .replace('{total}', book.quantity)}
+                </p>
+              </div>
+            </div>
+            {requestStatus === 'success' || userHasLoan ? (
+              <div className="flex flex-col items-center gap-1 text-center sm:text-left">
+                <div className="flex items-center gap-2 text-primary font-semibold text-label-sm">
+                  <MaterialIcon name="check_circle" size={18} filled />
+                  {userHasLoan && requestStatus !== 'success' ? 'Já Requisitado' : t('bookDetails.requestedSuccess')}
+                </div>
+                <span className="text-[10px] text-on-surface-variant">Aguardando aprovação do administrador</span>
+              </div>
+            ) : (
+              <Button
+                variant="primary"
+                size="lg"
+                uppercase
+                icon="book"
+                onClick={handleLoan}
+                disabled={isRequesting || !isAvailable}
+                className="w-full sm:w-auto shrink-0 !text-white [&_.material-symbols-outlined]:!text-white"
+              >
+                {isRequesting ? '...' : t('bookDetails.requestBook')}
+              </Button>
+            )}
+          </div>
+
+          {/* Metadata row — year + publisher side by side */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+            <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/50 shadow-sm flex justify-between items-center">
+              <div>
+                <p className="text-label-sm text-secondary tracking-widest mb-1">{t('bookDetails.yearEdition').toUpperCase()}</p>
+                <p className="text-headline-sm text-on-surface">{book.year_edition || '—'}</p>
+              </div>
+              <MaterialIcon name="calendar_today" size={32} className="text-secondary" />
+            </div>
+            <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/50 shadow-sm flex justify-between items-center">
+              <div>
+                <p className="text-label-sm text-secondary tracking-widest mb-1">{t('bookDetails.publisher').toUpperCase()}</p>
+                <p className="text-headline-sm text-on-surface line-clamp-2">{book.publisher || '—'}</p>
+              </div>
+              <MaterialIcon name="menu_book" size={32} className="text-secondary" />
+            </div>
+          </div>
+
+          {/* Summary */}
+          <div className="bg-surface-container-high p-6 rounded-xl border border-outline-variant/50 space-y-3 mb-12">
+            <h3 className="text-headline-sm text-primary flex items-center gap-2">
+              <MaterialIcon name="auto_awesome" size={22} />
+              {book.ai_summary ? t('bookDetails.aiSummary') : t('bookDetails.aboutBook')}
+            </h3>
+            <p className="text-on-surface-variant leading-relaxed">
+              {book.ai_summary || book.description || t('bookDetails.noDescription')}
+            </p>
+            {summaryError && (
+              <p className="text-error text-body-sm bg-error-container border border-error/20 px-4 py-3 rounded-none">
+                {summaryError}
+              </p>
+            )}
+            {!book.ai_summary && (
+              <button
+                type="button"
+                onClick={handleGenerateSummary}
+                disabled={isGeneratingSummary}
+                className="flex items-center gap-1.5 text-primary text-label-sm hover:underline disabled:opacity-50"
+              >
+                {isGeneratingSummary ? (
+                  <span className="w-3.5 h-3.5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                ) : (
+                  <MaterialIcon name="auto_awesome" size={14} />
+                )}
+                {isGeneratingSummary ? t('bookDetails.generatingAiSummary') : t('bookDetails.generateAiSummary')}
+              </button>
+            )}
+          </div>
+
+          {/* Metadata row */}
+          {(book.isbn || book.publisher) && (
+            <div className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/50 mb-12 space-y-2">
+              <p className="text-label-sm text-secondary tracking-widest">{t('bookDetails.bookMetadata').toUpperCase()}</p>
+              {book.isbn && (
+                <div className="flex justify-between text-body-md">
+                  <span className="text-on-surface-variant">{t('bookDetails.isbn')}</span>
+                  <span className="text-on-surface font-medium">{book.isbn}</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Reviews Section */}
-      <div className="bg-bg-surface rounded-[2rem] p-8 shadow-sm border border-border/30 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5 text-text-main">
-            <MessageSquare size={18} className="text-primary" />
-            <h3 className="text-lg font-semibold">{t('bookDetails.reviewsTitle')}</h3>
-          </div>
+      {/* Reviews */}
+      <section className="border-t border-outline-variant pt-12">
+        <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+          <h2 className="text-headline-md text-primary">{t('bookDetails.reviewsTitle')}</h2>
           {user && !showReviewForm && (
             <button
+              type="button"
               onClick={() => setShowReviewForm(true)}
-              className="text-sm font-medium bg-primary/10 text-primary px-4 py-2 rounded-xl hover:bg-primary/20 transition-colors"
+              className="text-primary text-label-sm flex items-center gap-2 hover:underline tracking-widest"
             >
-              {userReview ? t('bookDetails.editReview') : t('bookDetails.writeReview')}
+              {userReview ? t('bookDetails.editReview') : t('bookDetails.writeReview').toUpperCase()}
+              <MaterialIcon name="edit_note" size={18} />
             </button>
           )}
         </div>
 
         {showReviewForm && (
-          <form onSubmit={handleSubmitReview} className="bg-bg-main/50 p-6 rounded-2xl border border-border/50 space-y-5">
+          <form onSubmit={handleSubmitReview} className="bg-surface-container-high p-6 rounded-xl border border-outline-variant/50 space-y-5 mb-8">
             <div className="space-y-1">
-              <label className="text-sm font-medium text-text-main block">{t('bookDetails.ratingLabel')} <span className="text-red-500">*</span></label>
+              <label className="text-label-sm text-on-surface block">
+                {t('bookDetails.ratingLabel')} <span className="text-error">*</span>
+              </label>
               <StarRating
                 rating={reviewForm.rating}
-                interactive={true}
-                onChange={(rating) => setReviewForm(prev => ({ ...prev, rating }))}
+                interactive
+                onChange={(rating) => setReviewForm((prev) => ({ ...prev, rating }))}
                 size={24}
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-text-main block">{t('bookDetails.commentLabel')}</label>
+              <label className="text-label-sm text-on-surface block">{t('bookDetails.commentLabel')}</label>
               <textarea
                 value={reviewForm.comment}
-                onChange={(e) => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
+                onChange={(e) => setReviewForm((prev) => ({ ...prev, comment: e.target.value }))}
                 placeholder="..."
-                className="w-full bg-bg-surface border border-border/50 rounded-xl p-4 text-sm focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 min-h-[100px] resize-y"
+                className="w-full bg-surface border border-outline-variant rounded-none p-4 text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-h-[100px] resize-y input-inset"
               />
             </div>
-            <div className="flex items-center gap-3 pt-2">
-              <button
-                type="submit"
-                disabled={isSubmittingReview || reviewForm.rating === 0}
-                className="bg-primary text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-sm shadow-primary/20 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100"
-              >
+            <div className="flex items-center gap-3">
+              <Button type="submit" variant="primary" disabled={isSubmittingReview || reviewForm.rating === 0}>
                 {isSubmittingReview ? '...' : t('bookDetails.submitReview')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowReviewForm(false)}
-                className="px-6 py-2.5 rounded-xl text-sm font-bold text-text-muted hover:bg-border/50 transition-colors"
-              >
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setShowReviewForm(false)}>
                 {t('bookDetails.cancelReview')}
-              </button>
+              </Button>
             </div>
           </form>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-6">
           {reviews.length === 0 ? (
-            <p className="text-sm text-text-muted italic">{t('bookDetails.noReviews')}</p>
+            <p className="text-body-md text-on-surface-variant italic">{t('bookDetails.noReviews')}</p>
           ) : (
-            reviews.map(review => (
-              <div key={review.id} className="border-b border-border/20 last:border-0 pb-5 last:pb-0">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase">
-                      {review.profiles?.name?.charAt(0) || 'U'}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-text-main">
-                        {review.profiles?.name || 'Utilizador'}
-                        {user?.id === review.user_id && <span className="ml-2 text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-wider">{t('bookDetails.youReviewed')}</span>}
-                      </p>
-                      <p className="text-[10px] text-text-muted">{new Date(review.created_at).toLocaleDateString()}</p>
-                    </div>
+            reviews.map((review) => (
+              <div
+                key={review.id}
+                className="bg-surface-container-high p-6 rounded-xl border border-outline-variant/30"
+              >
+                <div className="flex items-center gap-4 mb-4 flex-wrap">
+                  <div className="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-label-sm shrink-0">
+                    {initials(review.profiles?.name)}
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex-grow min-w-0">
+                    <p className="text-body-md font-semibold text-on-surface">
+                      {review.profiles?.name || 'Utilizador'}
+                      {user?.id === review.user_id && (
+                        <span className="ml-2 text-[10px] bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-none uppercase tracking-wider">
+                          {t('bookDetails.youReviewed')}
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-[12px] text-on-surface-variant">
+                      {new Date(review.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 ml-auto">
                     <StarRating rating={review.rating} size={14} />
                     {(isAdmin || user?.id === review.user_id) && (
                       <button
+                        type="button"
                         onClick={async () => {
                           const confirmed = await confirm({
-                            title: "Apagar Avaliação",
-                            message: "Tem a certeza que deseja apagar esta avaliação?",
-                            type: "danger"
+                            title: 'Apagar Avaliação',
+                            message: 'Tem a certeza que deseja apagar esta avaliação?',
+                            type: 'danger',
                           })
                           if (confirmed) {
                             const { error } = await supabase.from('reviews').delete().eq('id', review.id)
                             if (!error) {
-                              showToast("Avaliação apagada com sucesso.", "success")
+                              showToast('Avaliação apagada com sucesso.', 'success')
                               if (user?.id === review.user_id) {
                                 setUserReview(null)
                                 setShowReviewForm(false)
                                 setReviewForm({ rating: 0, comment: '' })
                               }
-                              setReviews(prev => prev.filter(r => r.id !== review.id))
+                              setReviews((prev) => prev.filter((r) => r.id !== review.id))
                             } else {
-                              showToast("Erro ao apagar avaliação.", "danger")
+                              showToast('Erro ao apagar avaliação.', 'danger')
                             }
                           }
                         }}
-                        className="text-red-500 hover:text-red-600 transition-colors bg-red-500/10 p-1.5 rounded-lg"
+                        className="text-error hover:bg-error-container p-2 rounded-none transition-colors"
                         title="Apagar avaliação"
                       >
-                        <Trash2 size={14} />
+                        <MaterialIcon name="delete" size={18} />
                       </button>
                     )}
                   </div>
                 </div>
                 {review.comment && (
-                  <p className="text-sm text-text-muted ml-10 mt-1 leading-relaxed">{review.comment}</p>
+                  <p className="text-body-md text-on-surface-variant leading-relaxed">{review.comment}</p>
                 )}
               </div>
             ))
           )}
         </div>
-      </div>
+      </section>
     </div>
   )
 }

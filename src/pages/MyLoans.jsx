@@ -5,12 +5,9 @@ import { useAuth } from '../hooks/useAuth'
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
 import { Book as BookIcon, Clock, CheckCircle, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-function cn(...inputs) {
-  return twMerge(clsx(inputs))
-}
+import PageHeader from '../components/ui/PageHeader'
+import Button from '../components/ui/Button'
+import { cn } from '../lib/cn'
 const MyLoans = () => {
   const { t } = useLanguage();
   const { user, loading: authLoading } = useAuth()
@@ -76,16 +73,13 @@ const MyLoans = () => {
   }, [authLoading, user])
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12 pb-20">
-      <div className="space-y-1">
-        <h1 className="text-4xl font-black text-text-main tracking-tight">{t('myLoans.title')}</h1>
-        <p className="text-text-muted text-lg font-medium mt-1">{t('myLoans.subtitle')}</p>
-      </div>
+    <div className="max-w-3xl mx-auto w-full page-stack">
+      <PageHeader title={t('myLoans.title')} subtitle={t('myLoans.subtitle')} />
 
       {loading ? (
         <div className="space-y-4">
            {[1,2,3,4].map(i => (
-             <div key={i} className="bg-bg-surface border border-border p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6 animate-pulse">
+             <div key={i} className="bg-surface-container-lowest border border-outline-variant p-6 rounded-lg flex flex-col md:flex-row items-center gap-6 animate-pulse">
                <div className="w-16 h-24 bg-bg-main rounded shrink-0" />
                <div className="flex-grow space-y-2 w-full">
                  <div className="h-5 bg-bg-main rounded w-1/2" />
@@ -98,8 +92,8 @@ const MyLoans = () => {
       ) : loans.length > 0 ? (
         <div className="space-y-4">
           {loans.map((loan) => (
-            <div key={loan.id} className="bg-bg-surface border border-border p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6 group hover:border-primary/30 transition-colors shadow-sm">
-              <div className="w-16 h-24 bg-bg-main rounded overflow-hidden flex-shrink-0 border border-border/50">
+            <div key={loan.id} className="bg-surface-container-lowest border border-outline-variant p-6 md:p-8 rounded-lg flex flex-col md:flex-row items-center gap-6 group hover:border-primary/30 transition-colors shadow-card-bottom">
+              <div className="w-16 aspect-[2/3] bg-surface-container rounded overflow-hidden flex-shrink-0 border border-outline-variant">
                 {loan.books?.cover_image && (
                   <img 
                     src={supabase.storage.from('capalivro').getPublicUrl(loan.books.cover_image).data.publicUrl} 
@@ -159,12 +153,14 @@ const MyLoans = () => {
           ))}
         </div>
       ) : (
-        <div className="py-20 text-center space-y-6 bg-bg-surface/50 rounded-3xl border border-dashed border-border">
-          <BookIcon size={64} className="mx-auto text-text-muted opacity-20" />
-          <div className="space-y-2">
-            <h3 className="text-xl font-bold">{t('myLoans.emptyTitle')}</h3>
-            <p className="text-text-muted">{t('myLoans.emptyDesc')}</p>
-            <Link to="/" className="inline-block bg-primary text-bg-main px-8 py-3 rounded-full font-bold hover:bg-primary-hover transition-all">{t('myLoans.exploreCatalog')}</Link>
+        <div className="py-12 text-center space-y-6 bg-surface-container-low rounded-lg border border-dashed border-outline-variant card-padding">
+          <BookIcon size={48} className="mx-auto text-on-surface-variant opacity-30" />
+          <div className="space-y-3">
+            <h3 className="text-headline-sm text-on-surface">{t('myLoans.emptyTitle')}</h3>
+            <p className="text-body-md text-on-surface-variant">{t('myLoans.emptyDesc')}</p>
+            <Link to="/catalogo">
+              <Button variant="primary">{t('myLoans.exploreCatalog')}</Button>
+            </Link>
           </div>
         </div>
       )}

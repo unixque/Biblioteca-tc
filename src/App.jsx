@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { AuthProvider } from './context/AuthContext'
 import { NotificationProvider } from './context/NotificationContext'
+import { LibraryDataProvider } from './context/LibraryDataContext'
 
 import Home from './pages/Home'
 import BookDetails from './pages/BookDetails'
@@ -51,9 +52,9 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-bg-main flex flex-col items-center justify-center z-[9999] gap-4">
+      <div className="fixed inset-0 bg-surface flex flex-col items-center justify-center z-[9999] gap-4 px-margin-mobile">
         <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-        <p className="text-xs font-bold text-text-muted uppercase tracking-[0.2em] animate-pulse">A Carregar Biblioteca...</p>
+        <p className="text-label-sm text-on-surface-variant animate-pulse">A Carregar Biblioteca...</p>
       </div>
     )
   }
@@ -128,9 +129,11 @@ function App() {
   return (
     <NotificationProvider>
       <AuthProvider>
-        <Router>
-          <AppContent />
-        </Router>
+        <LibraryDataProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </LibraryDataProvider>
       </AuthProvider>
     </NotificationProvider>
   )

@@ -35,6 +35,8 @@ export default {
     title: 'Tomás Cabreira Secondary School',
     subtitle: 'Welcome to our library\'s digital portal. Explore our vast catalog of books, theses, and educational resources.',
     exploreBtn: 'Explore Catalog',
+    ctaTitle: 'Ready to borrow a book?',
+    ctaDesc: 'Create your account now and explore the library\'s digital catalog.',
     aboutTitle: 'About our Library',
     aboutDesc: 'The Tomás Cabreira Secondary School Library is a space for learning, discovery, and sharing. Now, with our digital version, you can check book availability and manage your requests from anywhere.',
     features: {
@@ -292,7 +294,11 @@ export default {
     errorCheckNet: 'Please check your internet connection.',
     retryBtn: 'Try Again',
     noBooksFound: 'No books matched your search.',
-    searchNoResults: 'Try using different keywords or clearing your filters.'
+    searchNoResults: 'Try using different keywords or clearing your filters.',
+    paginationLabel: 'Catalog pagination',
+    page: 'Page {page}',
+    prevPage: 'Previous page',
+    nextPage: 'Next page',
   },
   myLoans: {
   title: 'My Loans',

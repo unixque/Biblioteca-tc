@@ -13,9 +13,11 @@ function cn(...inputs) {
 
 import { useLanguage } from '../../context/LanguageContext'
 import { useNotification } from '../../context/NotificationContext'
+import { useLibraryData } from '../../context/LibraryDataContext'
 
 const BookForm = () => {
   const { showToast } = useNotification()
+  const { invalidateCatalog, invalidateBook } = useLibraryData()
   const { t, translateCategory } = useLanguage()
   const { id } = useParams()
   const navigate = useNavigate()
@@ -115,6 +117,8 @@ const BookForm = () => {
         if (error) throw error
       }
 
+      invalidateCatalog()
+      if (isEdit) invalidateBook(id)
       navigate('/console/livros')
       showToast(isEdit ? t('admin.books.toastSaved') : t('admin.books.toastAdded'), 'success')
     } catch (error) {
@@ -125,7 +129,7 @@ const BookForm = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto pb-20 space-y-10">
+    <div className="max-w-5xl mx-auto w-full page-stack">
       <div className="flex items-center gap-6">
         <button 
           onClick={() => navigate(-1)} 
@@ -142,7 +146,7 @@ const BookForm = () => {
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
         {/* Cover Upload */}
         <div className="space-y-6">
-          <div className="aspect-[3/4.5] bg-white border-2 border-dashed border-border/50 rounded-[2.5rem] overflow-hidden relative group shadow-sm">
+          <div className="aspect-[3/4.5] bg-white border-2 border-dashed border-border/50 rounded-lg overflow-hidden relative group shadow-sm">
             {imagePreview ? (
               <img src={imagePreview} className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500" alt="Preview" />
             ) : (
@@ -164,7 +168,7 @@ const BookForm = () => {
               <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
             </label>
           </div>
-          <div className="p-6 bg-white rounded-[2rem] border border-border/50 space-y-3 shadow-sm">
+          <div className="p-6 bg-white rounded-lg border border-border/50 space-y-3 shadow-sm">
              <h4 className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.editBook.guidelines')}</h4>
              <ul className="text-xs text-text-muted space-y-2 opacity-60 font-medium">
                 <li>• {t('admin.editBook.guideline1')}</li>
@@ -181,7 +185,7 @@ const BookForm = () => {
               <label className="text-xs font-extrabold uppercase tracking-[0.2em] text-text-muted ml-1">{t('admin.editBook.fullTitle')}</label>
               <input 
                 required
-                className="w-full bg-bg-main/50 border border-transparent rounded-[1.25rem] py-4 px-6 outline-none focus:bg-white focus:border-primary/30 transition-all font-bold text-text-main text-lg shadow-inner focus:shadow-none"
+                className="w-full bg-bg-main/50 border border-transparent rounded-lg py-4 px-6 outline-none focus:bg-white focus:border-primary/30 transition-all font-bold text-text-main text-lg shadow-inner focus:shadow-none"
                 placeholder={t('admin.editBook.titlePlaceholder') || "The Great Gatsby"}
                 value={formData.title}
                 onChange={e => setFormData({...formData, title: e.target.value})}
@@ -191,7 +195,7 @@ const BookForm = () => {
             <div className="space-y-3">
               <label className="text-xs font-extrabold uppercase tracking-[0.2em] text-text-muted ml-1">{t('admin.editBook.authorName')}</label>
               <input 
-                className="w-full bg-bg-main/50 border border-transparent rounded-[1.25rem] py-4 px-6 outline-none focus:bg-white focus:border-primary/30 transition-all font-bold shadow-inner focus:shadow-none"
+                className="w-full bg-bg-main/50 border border-transparent rounded-lg py-4 px-6 outline-none focus:bg-white focus:border-primary/30 transition-all font-bold shadow-inner focus:shadow-none"
                 placeholder={t('admin.editBook.authorPlaceholder') || "F. Scott Fitzgerald"}
                 value={formData.author}
                 onChange={e => setFormData({...formData, author: e.target.value})}
@@ -201,7 +205,7 @@ const BookForm = () => {
             <div className="space-y-3">
               <label className="text-xs font-extrabold uppercase tracking-[0.2em] text-text-muted ml-1">{t('admin.editBook.isbnReference')}</label>
               <input 
-                className="w-full bg-bg-main/50 border border-transparent rounded-[1.25rem] py-4 px-6 outline-none focus:bg-white focus:border-primary/30 transition-all font-mono font-bold shadow-inner focus:shadow-none"
+                className="w-full bg-bg-main/50 border border-transparent rounded-lg py-4 px-6 outline-none focus:bg-white focus:border-primary/30 transition-all font-mono font-bold shadow-inner focus:shadow-none"
                 placeholder={t('admin.editBook.isbnPlaceholder') || "978-0-..."}
                 value={formData.isbn}
                 onChange={e => setFormData({...formData, isbn: e.target.value})}
@@ -221,7 +225,7 @@ const BookForm = () => {
             <div className="space-y-3">
               <label className="text-xs font-extrabold uppercase tracking-[0.2em] text-text-muted ml-1">{t('admin.editBook.publisher')}</label>
               <input 
-                className="w-full bg-bg-main/50 border border-transparent rounded-[1.25rem] py-4 px-6 outline-none focus:bg-white focus:border-primary/30 transition-all font-bold shadow-inner focus:shadow-none"
+                className="w-full bg-bg-main/50 border border-transparent rounded-lg py-4 px-6 outline-none focus:bg-white focus:border-primary/30 transition-all font-bold shadow-inner focus:shadow-none"
                 placeholder={t('admin.editBook.publisherPlaceholder') || "Charles Scribner's Sons"}
                 value={formData.publisher}
                 onChange={e => setFormData({...formData, publisher: e.target.value})}
@@ -234,7 +238,7 @@ const BookForm = () => {
               <label className="text-xs font-extrabold uppercase tracking-[0.2em] text-text-muted ml-1">{t('admin.editBook.inventoryQuantity')}</label>
               <input 
                 type="number"
-                className="w-full bg-bg-main/50 border border-transparent rounded-[1.25rem] py-4 px-6 outline-none focus:bg-white focus:border-primary/30 transition-all font-bold shadow-inner focus:shadow-none"
+                className="w-full bg-bg-main/50 border border-transparent rounded-lg py-4 px-6 outline-none focus:bg-white focus:border-primary/30 transition-all font-bold shadow-inner focus:shadow-none"
                 value={formData.quantity}
                 onChange={e => setFormData({...formData, quantity: parseInt(e.target.value), available_qty: parseInt(e.target.value)})}
               />
@@ -244,7 +248,7 @@ const BookForm = () => {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-primary text-white py-5 rounded-[1.5rem] font-extrabold shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-sm"
+                className="w-full bg-primary text-white py-5 rounded-lg font-extrabold shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-sm"
               >
                 {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
                 {isEdit ? t('admin.editBook.updateBookBtn') : t('admin.editBook.addBookBtn')}

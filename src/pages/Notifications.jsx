@@ -1,9 +1,12 @@
-import { Bell, Inbox, ChevronLeft, Info, CheckCircle2, AlertTriangle, XCircle, Check } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useLanguage } from '../context/LanguageContext'
+import PageHeader from '../components/ui/PageHeader'
+import MaterialIcon from '../components/ui/MaterialIcon'
+import Button from '../components/ui/Button'
+import { cn } from '../lib/cn'
 
 const Notifications = () => {
   const { t } = useLanguage()
@@ -19,100 +22,109 @@ const Notifications = () => {
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-      if (!error && data) {
-        setNotifications(data)
-      }
+      if (!error && data) setNotifications(data)
       setLoading(false)
     }
     fetchNotifications()
 
-    // Subscribe to new notifications
-    const channel = supabase.channel('user_notifications')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, (payload) => {
-        setNotifications(prev => [payload.new, ...prev])
-      }).subscribe()
+    const channel = supabase
+      .channel('user_notifications')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        (payload) => setNotifications((prev) => [payload.new, ...prev])
+      )
+      .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [user])
 
   const markAsRead = async (id) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
     await supabase.from('notifications').update({ read: true }).eq('id', id)
   }
 
   const markAllAsRead = async () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
     await supabase.from('notifications').update({ read: true }).eq('user_id', user.id)
   }
 
-  const getIcon = (type) => {
-    if (type === 'success') return <CheckCircle2 className="text-green-500" size={20} />
-    if (type === 'warning') return <AlertTriangle className="text-yellow-500" size={20} />
-    if (type === 'error') return <XCircle className="text-red-500" size={20} />
-    return <Info className="text-primary" size={20} />
+  const iconFor = (type) => {
+    if (type === 'success') return 'check_circle'
+    if (type === 'warning') return 'warning'
+    if (type === 'error') return 'error'
+    return 'info'
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-20">
-      <div className="flex items-end justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-4xl font-black text-text-main tracking-tight">{t('notifications.title')}</h1>
-          <p className="text-text-muted text-lg font-medium mt-1">{t('notifications.subtitle')}</p>
-        </div>
-        {notifications.some(n => !n.read) && (
-          <button onClick={markAllAsRead} className="hidden sm:flex items-center gap-2 px-4 py-2 bg-bg-surface border border-border/60 rounded-xl text-xs font-bold text-text-muted hover:text-text-main hover:bg-bg-main transition-all">
-            <Check size={14} /> Marcar tudo como lido
-          </button>
-        )}
-      </div>
+    <div className="max-w-3xl mx-auto w-full page-stack">
+      <PageHeader
+        title={t('notifications.title')}
+        subtitle={t('notifications.subtitle')}
+        action={
+          notifications.some((n) => !n.read) ? (
+            <Button variant="secondary" size="sm" onClick={markAllAsRead} icon="done_all">
+              Marcar tudo como lido
+            </Button>
+          ) : null
+        }
+      />
 
-      <div className="bg-bg-surface rounded-[2.5rem] border border-border/40 shadow-sm overflow-hidden min-h-[400px]">
+      <div className="bg-surface-container-lowest rounded-lg border border-outline-variant shadow-card-bottom overflow-hidden min-h-[320px]">
         {loading ? (
-          <div className="p-10 space-y-4">
+          <div className="p-6 space-y-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-24 bg-bg-main/50 animate-pulse rounded-2xl" />
+              <div key={i} className="h-20 bg-surface-container animate-pulse rounded-lg" />
             ))}
           </div>
         ) : notifications.length > 0 ? (
-          <div className="divide-y divide-border/20">
-            {notifications.map(n => (
-              <div 
-                key={n.id} 
-                className={`p-6 flex gap-4 transition-colors ${!n.read ? 'bg-primary/5' : 'hover:bg-bg-main/30'}`}
+          <div className="divide-y divide-outline-variant/40">
+            {notifications.map((n) => (
+              <div
+                key={n.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => !n.read && markAsRead(n.id)}
+                onKeyDown={(e) => e.key === 'Enter' && !n.read && markAsRead(n.id)}
+                className={cn(
+                  'p-6 flex gap-4 transition-colors cursor-pointer',
+                  !n.read ? 'bg-primary/5' : 'hover:bg-surface-container-low'
+                )}
               >
-                <div className="shrink-0 mt-1">{getIcon(n.type)}</div>
-                <div className="flex-1 space-y-1">
+                <MaterialIcon name={iconFor(n.type)} size={22} className="shrink-0 mt-0.5 text-primary" />
+                <div className="flex-1 space-y-1 min-w-0">
                   <div className="flex justify-between items-start gap-4">
-                    <h3 className={`text-base font-bold ${!n.read ? 'text-text-main' : 'text-text-muted'}`}>{n.title}</h3>
-                    <span className="text-[10px] uppercase font-bold text-text-muted/60 tracking-wider whitespace-nowrap">
+                    <h3
+                      className={cn(
+                        'text-body-md font-semibold',
+                        !n.read ? 'text-on-surface' : 'text-on-surface-variant'
+                      )}
+                    >
+                      {n.title}
+                    </h3>
+                    <span className="text-label-sm text-on-surface-variant whitespace-nowrap shrink-0">
                       {new Date(n.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className={`text-sm ${!n.read ? 'text-text-muted' : 'text-text-muted/70'}`}>{n.message}</p>
+                  <p className="text-body-md text-on-surface-variant text-sm">{n.message}</p>
                 </div>
                 {!n.read && (
-                  <div className="shrink-0 self-center">
-                    <div className="w-2.5 h-2.5 bg-primary rounded-full shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-                  </div>
+                  <span className="w-2.5 h-2.5 bg-primary rounded-full shrink-0 self-center shadow-[0_0_8px_rgba(99,29,29,0.45)]" />
                 )}
               </div>
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center text-center p-10 h-full min-h-[400px]">
-            <div className="w-20 h-20 bg-bg-main rounded-full flex items-center justify-center mb-6 text-text-muted/20">
-              <Inbox size={40} />
-            </div>
-            <h3 className="text-xl font-bold text-text-main">{t('notifications.emptyTitle')}</h3>
-            <p className="text-text-muted max-w-xs mt-2 font-medium">
-              {t('notifications.emptyDesc')}
-            </p>
-            <Link 
-              to="/" 
-              className="mt-8 px-8 py-3 bg-primary text-white rounded-2xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-105 transition-all active:scale-95"
-            >
-              {t('notifications.exploreCatalog')}
+          <div className="p-12 text-center space-y-4">
+            <MaterialIcon name="notifications" size={40} className="text-outline mx-auto" />
+            <h3 className="text-headline-sm text-on-surface">{t('notifications.emptyTitle')}</h3>
+            <p className="text-body-md text-on-surface-variant">{t('notifications.emptyDesc')}</p>
+            <Link to="/catalogo">
+              <Button variant="primary" size="sm">
+                {t('notifications.exploreCatalog')}
+              </Button>
             </Link>
           </div>
         )}

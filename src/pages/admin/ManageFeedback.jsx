@@ -31,35 +31,35 @@ const ManageFeedback = () => {
   }
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="page-stack">
       <div className="space-y-1">
         <h1 className="text-4xl font-black text-text-main tracking-tight">{t('admin.feedback.title')}</h1>
         <p className="text-text-muted text-lg font-medium mt-1">{t('admin.feedback.subtitle')}</p>
       </div>
 
-      <div className="bg-bg-surface rounded-[2rem] shadow-sm border border-border/50 overflow-hidden">
+      <div className="bg-bg-surface rounded-lg shadow-sm border border-border/50 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-bg-main/30">
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap">{t('admin.feedback.user')}</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap">{t('admin.feedback.message')}</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap">{t('admin.feedback.date')}</th>
+                <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap">{t('admin.feedback.user')}</th>
+                <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap">{t('admin.feedback.message')}</th>
+                <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap">{t('admin.feedback.date')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/30">
               {loading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td className="px-8 py-6"><div className="h-4 w-32 bg-bg-main rounded" /></td>
-                    <td className="px-8 py-6"><div className="h-4 w-64 bg-bg-main rounded" /></td>
-                    <td className="px-8 py-6"><div className="h-4 w-24 bg-bg-main rounded" /></td>
+                    <td className="px-6 py-4 md:px-8 md:py-5"><div className="h-4 w-32 bg-bg-main rounded" /></td>
+                    <td className="px-6 py-4 md:px-8 md:py-5"><div className="h-4 w-64 bg-bg-main rounded" /></td>
+                    <td className="px-6 py-4 md:px-8 md:py-5"><div className="h-4 w-24 bg-bg-main rounded" /></td>
                   </tr>
                 ))
               ) : feedback.length > 0 ? (
                 feedback.map((item) => (
                   <tr key={item.id} className="hover:bg-bg-main/30 transition-colors">
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-4 md:px-8 md:py-5">
                       <div className="flex flex-col">
                         <span className="font-bold text-text-main flex items-center gap-2">
                           <User size={14} className="text-primary" />
@@ -71,10 +71,10 @@ const ManageFeedback = () => {
                         </span>
                       </div>
                     </td>
-                    <td className="px-8 py-6 max-w-md">
+                    <td className="px-6 py-4 md:px-8 md:py-5 max-w-md">
                       <p className="text-sm text-text-main leading-relaxed italic">"{item.message}"</p>
                     </td>
-                    <td className="px-8 py-6 whitespace-nowrap">
+                    <td className="px-6 py-4 md:px-8 md:py-5 whitespace-nowrap">
                       <div className="flex items-center gap-2 text-text-muted">
                         <Calendar size={14} />
                         <span className="text-xs font-bold">{new Date(item.created_at).toLocaleDateString()}</span>

@@ -23,6 +23,8 @@ export default {
     title: 'Sekundarschule Tomás Cabreira',
     subtitle: 'Willkommen im digitalen Portal unserer Bibliothek. Erkunden Sie unseren umfangreichen Katalog an Büchern, Abschlussarbeiten und Bildungsressourcen.',
     exploreBtn: 'Katalog erkunden',
+    ctaTitle: 'Bereit, ein Buch auszuleihen?',
+    ctaDesc: 'Erstellen Sie jetzt Ihr Konto und erkunden Sie den digitalen Bibliothekskatalog.',
     aboutTitle: 'Über unsere Bibliothek',
     aboutDesc: 'Die Bibliothek der Sekundarschule Tomás Cabreira ist ein Ort des Lernens, Entdeckens und Teilens. Mit unserer digitalen Version können Sie jetzt von überall aus die Verfügbarkeit von Büchern prüfen und Ihre Anforderungen verwalten.',
     features: {

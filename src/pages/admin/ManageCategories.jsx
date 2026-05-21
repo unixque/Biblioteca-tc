@@ -136,7 +136,7 @@ const ManageCategories = () => {
   
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="page-stack">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
           <h1 className="text-4xl font-black text-text-main tracking-tight">{t('admin.categories.title')}</h1>
@@ -155,12 +155,12 @@ const ManageCategories = () => {
       )}
 
       {/* Add Category Form */}
-      <form onSubmit={handleAddCategory} className="bg-bg-surface p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-border/50 flex flex-col md:flex-row gap-3 md:gap-4 items-center">
+      <form onSubmit={handleAddCategory} className="bg-bg-surface p-3 md:p-4 rounded-lg md:rounded-lg shadow-sm border border-border/50 flex flex-col md:flex-row gap-3 md:gap-4 items-center">
         <div className="relative flex-grow w-full">
           <input 
             type="text"
             placeholder={t('admin.categories.addPlaceholder')}
-            className="w-full h-12 md:h-14 bg-bg-main/50 border border-transparent rounded-xl md:rounded-[1.25rem] pl-6 pr-6 text-sm font-bold focus:bg-bg-surface focus:border-primary/30 outline-none transition-all"
+            className="w-full h-12 md:h-14 bg-bg-main/50 border border-transparent rounded-xl md:rounded-lg pl-6 pr-6 text-sm font-bold focus:bg-bg-surface focus:border-primary/30 outline-none transition-all"
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
           />
@@ -168,7 +168,7 @@ const ManageCategories = () => {
         <div className="w-full md:w-auto flex-shrink-0">
           <button 
             type="submit"
-            className="w-full md:w-auto h-12 md:h-14 bg-primary text-white px-8 rounded-xl md:rounded-[1.25rem] text-xs font-bold uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center gap-2 flex-shrink-0 shadow-lg shadow-primary/20"
+            className="w-full md:w-auto h-12 md:h-14 bg-primary text-white px-8 rounded-xl md:rounded-lg text-xs font-bold uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center gap-2 flex-shrink-0 shadow-lg shadow-primary/20"
           >
             <Plus size={18} /> {t('admin.categories.addBtn')}
           </button>
@@ -177,7 +177,7 @@ const ManageCategories = () => {
 
 
       {/* Categories List */}
-      <div className="bg-bg-surface rounded-[1.5rem] md:rounded-[2rem] border border-border/50 overflow-hidden shadow-sm">
+      <div className="bg-bg-surface rounded-lg md:rounded-lg border border-border/50 overflow-hidden shadow-sm">
         {loading ? (
           <div className="divide-y divide-border/20">
             {[...Array(4)].map((_, i) => (

@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "optimize-slides": "node scripts/optimize-about-slides.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.1",
@@ -31,6 +32,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
     "postcss": "^8.5.8",
+    "sharp": "^0.34.5",
     "supabase": "^2.83.0",
     "tailwindcss": "^4.2.1",
     "uipro-cli": "^2.2.3",

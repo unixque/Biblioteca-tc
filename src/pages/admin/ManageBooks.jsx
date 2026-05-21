@@ -12,10 +12,12 @@ function cn(...inputs) {
 }
 import { useLanguage } from '../../context/LanguageContext'
 import { useNotification } from '../../context/NotificationContext'
+import { useLibraryData } from '../../context/LibraryDataContext'
 
 const ManageBooks = () => {
   const { t, translateCategory } = useLanguage()
   const { confirm, showToast } = useNotification()
+  const { invalidateCatalog } = useLibraryData()
   const [books, setBooks] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchParams] = useSearchParams()
@@ -87,6 +89,7 @@ const ManageBooks = () => {
 
     if (!error) {
       setBooks(books.map(b => b.id === id ? { ...b, is_featured: !currentStatus } : b))
+      invalidateCatalog()
     }
   }
 
@@ -102,6 +105,7 @@ const ManageBooks = () => {
       const { error } = await supabase.from('books').delete().eq('id', id)
       if (!error) {
         setBooks(books.filter(b => b.id !== id))
+        invalidateCatalog()
         showToast(t('admin.books.toastDeleted') || 'Livro apagado com sucesso.', 'success')
       } else {
         showToast(t('admin.books.toastDeleteError') || 'Erro ao apagar o livro.', 'error')
@@ -117,7 +121,7 @@ const ManageBooks = () => {
   })
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="page-stack">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
@@ -127,54 +131,54 @@ const ManageBooks = () => {
       </div>
 
       {/* Filters & Search */}
-      <div className="bg-bg-surface p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-border/50 flex flex-col md:flex-row gap-3 md:gap-4 items-center">
+      <div className="bg-bg-surface p-3 md:p-4 rounded-lg md:rounded-lg shadow-sm border border-border/50 flex flex-col md:flex-row gap-3 md:gap-4 items-center">
         <div className="relative flex-grow w-full">
           <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             placeholder={t('admin.books.searchPlaceholder')}
-            className="w-full h-12 md:h-14 bg-bg-main/50 border border-transparent rounded-xl md:rounded-[1.25rem] pl-14 pr-6 outline-none focus:bg-bg-surface focus:border-primary/30 transition-all text-sm font-bold"
+            className="w-full h-12 md:h-14 bg-bg-main/50 border border-transparent rounded-xl md:rounded-lg pl-14 pr-6 outline-none focus:bg-bg-surface focus:border-primary/30 transition-all text-sm font-bold"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <div className="flex w-full md:w-auto items-center gap-3 md:gap-4 flex-grow md:flex-grow-0">
-          <Link
-            to="/console/livros/novo"
-            className="flex-shrink-0 bg-primary text-white h-12 md:h-14 px-5 md:px-8 rounded-xl md:rounded-[1.25rem] font-bold flex items-center gap-2 hover:scale-[1.02] transition-all shadow-lg shadow-primary/20 active:scale-95 uppercase tracking-widest text-[10px] md:text-xs whitespace-nowrap"
-          >
-            <Plus size={18} /> {t('admin.dashboard.addNewBook')}
-          </Link>
           <div className="w-full md:w-64 min-w-0 md:min-w-[250px] flex-shrink-0">
-            <Select 
-              options={[{ id: '0', name: t('admin.books.allCategories') }, ...categories.map(c => ({...c, name: translateCategory(c.name)}))]}
+            <Select
+              options={[{ id: '0', name: t('admin.books.allCategories') }, ...categories.map(c => ({ ...c, name: translateCategory(c.name) }))]}
               value={categoryFilter}
               onChange={setCategoryFilter}
               placeholder={t('admin.books.filterPlaceholder')}
             />
           </div>
+          <Link
+            to="/console/livros/novo"
+            className="flex-shrink-0 bg-primary text-white h-12 md:h-14 px-5 md:px-8 rounded-xl md:rounded-lg font-bold flex items-center gap-2 hover:scale-[1.02] transition-all shadow-lg shadow-primary/20 active:scale-95 uppercase tracking-widest text-[10px] md:text-xs whitespace-nowrap"
+          >
+            <Plus size={18} /> {t('admin.dashboard.addNewBook')}
+          </Link>
         </div>
       </div>
 
       {/* Table Section - desktop */}
-      <div className="hidden md:block bg-bg-surface rounded-[2rem] shadow-sm border border-border/50 overflow-hidden">
+      <div className="hidden md:block bg-bg-surface rounded-lg shadow-sm border border-border/50 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-bg-main/30">
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.books.id')}</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.books.bookInfo')}</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.books.inventory')}</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted text-center">{t('admin.books.featured')}</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted text-right">{t('admin.books.actions')}</th>
+                <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.books.id')}</th>
+                <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.books.bookInfo')}</th>
+                <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.books.inventory')}</th>
+                <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted text-center">{t('admin.books.featured')}</th>
+                <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted text-right">{t('admin.books.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/30">
               {loading ? (
                 [...Array(6)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td className="px-8 py-6"><div className="h-4 w-8 bg-bg-main rounded" /></td>
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-4 md:px-8 md:py-5"><div className="h-4 w-8 bg-bg-main rounded" /></td>
+                    <td className="px-6 py-4 md:px-8 md:py-5">
                       <div className="flex items-center gap-6">
                         <div className="w-14 h-20 bg-bg-main rounded-xl shrink-0" />
                         <div className="space-y-2">
@@ -183,14 +187,14 @@ const ManageBooks = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-4 md:px-8 md:py-5">
                       <div className="space-y-2">
                         <div className="h-2 w-20 bg-bg-main rounded" />
                         <div className="h-1.5 w-32 bg-bg-main rounded" />
                       </div>
                     </td>
-                    <td className="px-8 py-6"><div className="h-10 w-10 bg-bg-main rounded-full mx-auto" /></td>
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-4 md:px-8 md:py-5"><div className="h-10 w-10 bg-bg-main rounded-full mx-auto" /></td>
+                    <td className="px-6 py-4 md:px-8 md:py-5">
                       <div className="flex gap-2 justify-end">
                         <div className="h-10 w-10 bg-bg-main rounded-xl" />
                         <div className="h-10 w-10 bg-bg-main rounded-xl" />
@@ -201,10 +205,10 @@ const ManageBooks = () => {
               ) : filteredBooks.length > 0 ? (
                 filteredBooks.map((book) => (
                   <tr key={book.id} className="hover:bg-bg-main/30 transition-colors group">
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-4 md:px-8 md:py-5">
                       <span className="text-xs font-mono font-bold text-text-muted opacity-50">#{book.id}</span>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-4 md:px-8 md:py-5">
                       <div className="flex items-center gap-6">
                         <div className="w-14 h-20 bg-bg-main rounded-xl overflow-hidden shadow-sm border border-border/10 flex-shrink-0">
                           {book.cover_image && (
@@ -221,7 +225,7 @@ const ManageBooks = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-4 md:px-8 md:py-5">
                       <div className="space-y-2">
                         <div className="flex justify-between text-[10px] font-bold text-text-muted uppercase">
                           <span>{t('admin.books.available')}</span>
@@ -239,7 +243,7 @@ const ManageBooks = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6 text-center">
+                    <td className="px-6 py-4 md:px-8 md:py-5 text-center">
                       <button
                         onClick={() => toggleFeatured(book.id, book.is_featured)}
                         className={cn(
@@ -250,7 +254,7 @@ const ManageBooks = () => {
                         <Star size={18} fill={book.is_featured ? 'currentColor' : 'none'} />
                       </button>
                     </td>
-                    <td className="px-8 py-6 text-right">
+                    <td className="px-6 py-4 md:px-8 md:py-5 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           to={`/console/livros/editar/${book.id}`}

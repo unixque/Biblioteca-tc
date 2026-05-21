@@ -54,7 +54,7 @@ const AdminLogin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-inverse-surface flex items-center justify-center px-margin-mobile md:px-margin-desktop py-12 relative overflow-hidden">
       {/* Background Orbs */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px]" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]" />
@@ -66,7 +66,7 @@ const AdminLogin = () => {
           {t('admin.login.backToLibrary')}
         </Link>
 
-        <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] p-8 md:p-10 rounded-[3rem] shadow-2xl space-y-8">
+        <div className="bg-surface-container-lowest/5 backdrop-blur-xl border border-outline-variant/30 p-8 md:p-10 rounded-xl shadow-ambient space-y-8">
           <div className="text-center space-y-3">
             <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-primary/20 text-primary mb-1">
               <ShieldCheck size={32} strokeWidth={1.5} />

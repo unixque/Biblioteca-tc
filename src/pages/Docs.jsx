@@ -1,57 +1,50 @@
-import { BookOpen, Key, Clock, Bot, AlertCircle, MessageSquare } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
+import PageHeader from '../components/ui/PageHeader'
+import MaterialIcon from '../components/ui/MaterialIcon'
+import Card from '../components/ui/Card'
 
-const DocSection = ({ icon: Icon, title, children }) => (
-  <div className="bg-bg-surface border border-border/50 rounded-[2rem] p-8 shadow-sm hover:shadow-md transition-shadow">
+const DOC_ICONS = {
+  borrow: 'menu_book',
+  pin: 'key',
+  duration: 'schedule',
+  ai: 'auto_awesome',
+  fine: 'warning',
+  feedback: 'forum',
+}
+
+const DocSection = ({ icon, title, children }) => (
+  <Card padding="p-6 md:p-8" className="hover:shadow-ambient transition-shadow duration-300">
     <div className="flex flex-col md:flex-row gap-6">
-      <div className="shrink-0">
-        <div className="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
-          <Icon size={28} />
-        </div>
+      <div className="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center text-primary shrink-0">
+        <MaterialIcon name={icon} size={28} />
       </div>
-      <div className="space-y-4 flex-grow">
-        <h2 className="text-2xl font-black text-text-main tracking-tight uppercase">{title}</h2>
-        <div className="text-text-muted text-lg leading-relaxed font-medium">
-          {children}
-        </div>
+      <div className="space-y-3 flex-grow min-w-0">
+        <h2 className="text-headline-sm text-on-surface">{title}</h2>
+        <div className="text-body-lg text-on-surface-variant leading-relaxed">{children}</div>
       </div>
     </div>
-  </div>
+  </Card>
 )
 
 const Docs = () => {
   const { t } = useLanguage()
-
-  const sections = [
-    { id: 'borrow', icon: BookOpen },
-    { id: 'pin', icon: Key },
-    { id: 'duration', icon: Clock },
-    { id: 'ai', icon: Bot },
-    { id: 'fine', icon: AlertCircle },
-    { id: 'feedback', icon: MessageSquare }
-  ]
+  const sections = ['borrow', 'pin', 'duration', 'ai', 'fine', 'feedback']
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12 pb-20">
-      {/* Header */}
-      <div className="space-y-4">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-widest">
-          <BookOpen size={16} /> {t('docs.badge')}
-        </div>
-        <h1 className="text-4xl md:text-5xl font-black text-text-main tracking-tight">{t('docs.title')}</h1>
-        <p className="text-text-muted text-lg font-medium max-w-2xl">
-          {t('docs.subtitle')}
-        </p>
-      </div>
+    <div className="max-w-3xl mx-auto w-full page-stack">
+      <PageHeader
+        title={t('docs.title')}
+        subtitle={t('docs.subtitle')}
+      />
+      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary-container text-on-secondary-container text-label-sm -mt-4">
+        <MaterialIcon name="help" size={16} />
+        {t('docs.badge')}
+      </span>
 
-      <div className="space-y-6">
-        {sections.map((section) => (
-          <DocSection 
-            key={section.id} 
-            icon={section.icon} 
-            title={t(`docs.${section.id}.title`)}
-          >
-            <p>{t(`docs.${section.id}.desc`)}</p>
+      <div className="section-inner">
+        {sections.map((id) => (
+          <DocSection key={id} icon={DOC_ICONS[id]} title={t(`docs.${id}.title`)}>
+            <p>{t(`docs.${id}.desc`)}</p>
           </DocSection>
         ))}
       </div>

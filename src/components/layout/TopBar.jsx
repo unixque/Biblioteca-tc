@@ -1,9 +1,10 @@
-import { Search, Bell, HelpCircle, Home, Settings, Library, Grid } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useLanguage } from '../../context/LanguageContext'
 import { useSearchParams, Link, useLocation } from 'react-router-dom'
 import Select from '../ui/Select'
-import logo from '../../assets/logo.png'
+import MaterialIcon from '../ui/MaterialIcon'
+import { cn } from '../../lib/cn'
+import { LOGO_URL } from '../../lib/staticAssets'
 
 const TopBar = () => {
   const { user, profile, profileLoading, isAdmin } = useAuth()
@@ -12,6 +13,25 @@ const TopBar = () => {
   const location = useLocation()
   const query = searchParams.get('q') || ''
   const isDiscoverPage = location.pathname === '/' || location.pathname === '/catalogo'
+
+  const navLink = (path, label) => {
+    const active = location.pathname === path || (path === '/catalogo' && location.pathname === '/')
+    return (
+      <Link
+        to={path}
+        className={cn(
+          'hidden md:block font-body-md text-body-md transition-colors duration-200 pb-1',
+          active
+            ? 'text-primary font-bold border-b-2 border-primary'
+            : 'text-on-surface-variant font-medium hover:text-primary'
+        )}
+      >
+        {label}
+      </Link>
+    )
+  }
+
+  const navControlClass = 'h-10 rounded-none'
 
   const handleSearch = (e) => {
     const val = e.target.value
@@ -24,126 +44,150 @@ const TopBar = () => {
   }
 
   return (
-    <header className="sticky top-0 z-40 h-16 md:h-20 bg-bg-main/90 backdrop-blur-lg flex items-center justify-between px-3 md:px-8 gap-2 md:gap-4 py-3 md:py-4 border-b border-border/20 md:border-none">
-      {/* Logo */}
-      <div className="flex items-center gap-2 shrink-0">
-        <Link to="/landing" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 md:w-9 md:h-9 overflow-hidden shrink-0">
-            <img src={logo} alt="Logo" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
-          </div>
-          <span className="hidden lg:block text-sm font-black text-text-main tracking-tight leading-none">
-            Biblioteca<span className="text-primary italic">TC</span>
-          </span>
-        </Link>
-      </div>
-
-      {/* Search Bar - Only on Discover Page */}
-      <div className="flex-1 min-w-0 max-w-xl relative group">
-        {isDiscoverPage && (
-          <>
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors" size={15} />
-            <input
-              type="text"
-              placeholder={t('navbar.searchPlaceholder')}
-              value={query}
-              onChange={handleSearch}
-              className="w-full bg-bg-surface border border-border/50 rounded-xl py-2 pl-9 pr-3 text-sm text-text-main placeholder:text-text-muted/60 outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/8 transition-all"
-            />
-          </>
-        )}
-      </div>
-
-      {/* Right section */}
-      <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
-        {/* Language — hidden on tablet/mobile */}
-        <div className="w-24 lg:w-32 hidden lg:block">
-          <Select
-            options={[
-              { id: 'pt', name: 'PT' },
-              { id: 'en', name: 'EN' },
-              { id: 'es', name: 'ES' },
-              { id: 'fr', name: 'FR' },
-              { id: 'de', name: 'DE' },
-              { id: 'nl', name: 'NL' }
-            ]}
-            value={language}
-            onChange={setLanguage}
-            triggerClassName="!h-[38px] !px-3 !rounded-xl"
-          />
+    <header className="sticky top-0 z-40 bg-surface border-b border-outline-variant shadow-sm shadow-primary/5">
+      <div className="max-w-container-max mx-auto flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 md:h-20 gap-4">
+        <div className="flex items-center gap-6 md:gap-8 shrink-0">
+          <Link to={user ? '/catalogo' : '/landing'} className="flex items-center gap-2 group">
+            <div className="w-8 h-8 md:w-9 md:h-9 overflow-hidden shrink-0">
+              <img src={LOGO_URL} alt="Logo" className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-200" />
+            </div>
+            <span className="hidden lg:block text-headline-sm text-primary tracking-tight leading-none font-serif">
+              Biblioteca TC
+            </span>
+          </Link>
+          {user && (
+            <nav className="hidden md:flex items-center gap-6">
+              {navLink('/catalogo', t('navbar.home'))}
+              {!isAdmin && navLink('/emprestimos', t('sidebar.myLibrary'))}
+              {isAdmin && navLink('/console', t('sidebar.admin'))}
+            </nav>
+          )}
         </div>
 
-        {/* Desktop-only nav icons — hidden on mobile (handled by MobileNav) */}
-        {user && isAdmin && (
-          <Link to="/console" className="hidden md:flex p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all" title={t('sidebar.overview')}>
-            <Grid size={18} />
-          </Link>
-        )}
+        <div className="flex-1 min-w-0 max-w-xl relative group hidden sm:block">
+          {isDiscoverPage && (
+            <>
+              <MaterialIcon
+                name="search"
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors pointer-events-none"
+              />
+              <input
+                type="text"
+                placeholder={t('navbar.searchPlaceholder')}
+                value={query}
+                onChange={handleSearch}
+                className={cn(
+                  'topbar-search w-full bg-surface-container-low border border-outline-variant pl-10 pr-4 text-body-md text-on-surface placeholder:text-on-surface-variant/60 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all input-inset',
+                  navControlClass
+                )}
+              />
+            </>
+          )}
+        </div>
 
-        <Link to="/catalogo" className="hidden md:flex p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all" title={t('navbar.home')}>
-          <Home size={18} />
-        </Link>
-
-        {user && !isAdmin && (
-          <Link to="/emprestimos" className="hidden md:flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-xl font-bold text-sm transition-all shadow-sm">
-            <Library size={18} />
-            <span className="hidden xl:inline">{t('sidebar.myLibrary')}</span>
-          </Link>
-        )}
-
-        <Link to="/docs" className="hidden md:flex p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all" title={t('navbar.docs')}>
-          <HelpCircle size={18} />
-        </Link>
-
-        <Link to="/definicoes" className="hidden md:flex p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all" title={t('navbar.settings')}>
-          <Settings size={18} />
-        </Link>
-
-        {/* Bell — visible on desktop; on mobile it's in MobileNav */}
-        {user && (
-          <Link to="/notificacoes" className="hidden md:flex relative p-2 bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all" title={t('navbar.notifications')}>
-            <Bell size={18} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full border border-bg-surface" />
-          </Link>
-        )}
-
-        {/* Avatar — always visible */}
-        {user ? (
-          <div className="flex items-center gap-2 bg-bg-surface border border-border/40 px-2 py-1.5 rounded-xl">
-            <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg overflow-hidden bg-primary/10 flex items-center justify-center shrink-0">
-              <span className="text-[10px] font-bold text-primary uppercase">
-                {(() => {
-                  const name = user.user_metadata?.full_name || user.user_metadata?.display_name || user.user_metadata?.username || profile?.name || user.email?.split('@')[0] || 'U'
-                  const parts = name.trim().split(/\s+/)
-                  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
-                  return name.substring(0, 2).toUpperCase()
-                })()}
-              </span>
-            </div>
-            <div className="text-left hidden lg:block">
-              <p className="text-xs font-semibold text-text-main leading-tight">
-                {user.user_metadata?.full_name || user.user_metadata?.display_name || user.user_metadata?.username || profile?.name || user.email?.split('@')[0] || 'Utilizador'}
-              </p>
-              <p className="text-[10px] text-text-muted capitalize font-medium">
-                {profileLoading ? t('navbar.loading') : t(`admin.roles.${profile?.role || 'aluno'}`)}
-              </p>
-            </div>
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
+          <div className="w-20 lg:w-28 hidden lg:block">
+            <Select
+              options={[
+                { id: 'pt', name: 'PT' },
+                { id: 'en', name: 'EN' },
+                { id: 'es', name: 'ES' },
+                { id: 'fr', name: 'FR' },
+                { id: 'de', name: 'DE' },
+                { id: 'nl', name: 'NL' },
+              ]}
+              value={language}
+              onChange={setLanguage}
+              triggerClassName="!h-10 !px-3 !rounded-none !text-label-sm"
+            />
           </div>
-        ) : (
-          <div className="flex items-center gap-1.5 md:gap-2">
+
+          <Link
+            to="/docs"
+            className={cn(
+              'hidden md:flex items-center justify-center w-10 hover:bg-surface-container-low border border-transparent hover:border-outline-variant/50 transition-all text-on-surface-variant hover:text-primary',
+              navControlClass
+            )}
+            title={t('navbar.docs')}
+          >
+            <MaterialIcon name="help" size={20} />
+          </Link>
+
+          {user && (
             <Link
-              to="/login"
-              className="px-3 md:px-4 py-2 text-xs md:text-sm font-medium text-text-muted hover:text-primary transition-colors"
+              to="/notificacoes"
+              className={cn(
+                'hidden md:flex relative items-center justify-center w-10 hover:bg-surface-container-low border border-transparent hover:border-outline-variant/50 transition-all text-on-surface-variant hover:text-primary',
+                navControlClass
+              )}
+              title={t('navbar.notifications')}
             >
-              {t('navbar.login')}
+              <MaterialIcon name="notifications" size={20} />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full border border-surface" />
             </Link>
-            <Link
-              to="/signup"
-              className="px-3 md:px-4 py-2 bg-primary text-white text-xs md:text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-105 transition-all active:scale-95"
-            >
-              {t('navbar.register')}
-            </Link>
-          </div>
-        )}
+          )}
+
+          <Link
+            to="/definicoes"
+            className={cn(
+              'hidden md:flex items-center justify-center w-10 hover:bg-surface-container-low border border-transparent hover:border-outline-variant/50 transition-all text-on-surface-variant hover:text-primary',
+              navControlClass
+            )}
+            title={t('navbar.settings')}
+          >
+            <MaterialIcon name="settings" size={20} />
+          </Link>
+
+          {user ? (
+            <div className="flex items-center gap-2 bg-surface-container-low border border-outline-variant px-2 py-1.5 rounded-none">
+              <div className="w-8 h-8 rounded-none overflow-hidden bg-primary/10 flex items-center justify-center shrink-0">
+                <span className="text-[10px] font-bold text-primary uppercase">
+                  {(() => {
+                    const name =
+                      user.user_metadata?.full_name ||
+                      user.user_metadata?.display_name ||
+                      profile?.name ||
+                      user.email?.split('@')[0] ||
+                      'U'
+                    const parts = name.trim().split(/\s+/)
+                    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+                    return name.substring(0, 2).toUpperCase()
+                  })()}
+                </span>
+              </div>
+              <div className="text-left hidden xl:block">
+                <p className="text-xs font-semibold text-on-surface leading-tight">
+                  {user.user_metadata?.full_name || profile?.name || user.email?.split('@')[0]}
+                </p>
+                <p className="text-[10px] text-on-surface-variant capitalize">
+                  {profileLoading ? t('navbar.loading') : t(`admin.roles.${profile?.role || 'aluno'}`)}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/login"
+                className={cn(
+                  'inline-flex items-center justify-center px-4 text-label-sm text-primary border border-outline-variant hover:bg-surface-container-low transition-colors',
+                  navControlClass
+                )}
+              >
+                {t('navbar.login')}
+              </Link>
+              <Link
+                to="/signup"
+                className={cn(
+                  'inline-flex items-center justify-center px-4 text-label-sm text-on-primary bg-primary hover:bg-primary-deep transition-colors shadow-ambient',
+                  navControlClass
+                )}
+              >
+                {t('navbar.register')}
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   )

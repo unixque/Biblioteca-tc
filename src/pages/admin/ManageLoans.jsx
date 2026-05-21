@@ -222,7 +222,7 @@ const ManageLoans = () => {
   })
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="page-stack">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
           <h1 className="text-4xl font-black text-text-main tracking-tight">{t('admin.loans.title')}</h1>
@@ -268,13 +268,13 @@ const ManageLoans = () => {
       </div>
 
       {/* Filters & Search */}
-      <div className="bg-bg-surface p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-border/50 flex flex-col md:flex-row gap-3 md:gap-4 items-center">
+      <div className="bg-bg-surface p-3 md:p-4 rounded-lg md:rounded-lg shadow-sm border border-border/50 flex flex-col md:flex-row gap-3 md:gap-4 items-center">
         <div className="relative flex-grow w-full">
           <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             placeholder={t('admin.loans.searchPlaceholder') || 'Pesquisar...'}
-            className="w-full h-12 md:h-14 bg-bg-main/50 border border-transparent rounded-xl md:rounded-[1.25rem] pl-14 pr-6 outline-none focus:bg-bg-surface focus:border-primary/30 transition-all text-sm font-bold"
+            className="w-full h-12 md:h-14 bg-bg-main/50 border border-transparent rounded-xl md:rounded-lg pl-14 pr-6 outline-none focus:bg-bg-surface focus:border-primary/30 transition-all text-sm font-bold"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -296,20 +296,20 @@ const ManageLoans = () => {
         </div>
       </div>
 
-      <div className="hidden md:block bg-bg-surface rounded-[2rem] shadow-sm border border-border/50 overflow-hidden">
+      <div className="hidden md:block bg-bg-surface rounded-lg shadow-sm border border-border/50 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-bg-main/30">
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap">{t('admin.loans.id')}</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap">{t('admin.loans.user')}</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap">{t('admin.loans.bookDetails')}</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap">{t('admin.loans.borrowedDate') || 'REQUISITADO A'}</th>
+                <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap">{t('admin.loans.id')}</th>
+                <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap">{t('admin.loans.user')}</th>
+                <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap">{t('admin.loans.bookDetails')}</th>
+                <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap">{t('admin.loans.borrowedDate') || 'REQUISITADO A'}</th>
                 {statusFilter !== 'pending' && (
-                  <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap text-center">{t('admin.loans.status')}</th>
+                  <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap text-center">{t('admin.loans.status')}</th>
                 )}
                 {statusFilter !== 'all' && statusFilter !== 'returned' && statusFilter !== 'rejected' && (
-                  <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap text-right">{t('admin.loans.actions')}</th>
+                  <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted whitespace-nowrap text-right">{t('admin.loans.actions')}</th>
                 )}
               </tr>
             </thead>
@@ -324,14 +324,14 @@ const ManageLoans = () => {
               {loading ? (
                 [...Array(6)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td className="px-8 py-6"><div className="h-4 w-8 bg-bg-main rounded" /></td>
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-4 md:px-8 md:py-5"><div className="h-4 w-8 bg-bg-main rounded" /></td>
+                    <td className="px-6 py-4 md:px-8 md:py-5">
                       <div className="flex flex-col gap-2">
                         <div className="h-4 w-32 bg-bg-main rounded" />
                         <div className="h-3 w-20 bg-bg-main rounded opacity-50" />
                       </div>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-4 md:px-8 md:py-5">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-14 bg-bg-main rounded" />
                         <div className="space-y-2">
@@ -340,18 +340,18 @@ const ManageLoans = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6"><div className="h-4 w-24 bg-bg-main rounded" /></td>
-                    <td className="px-8 py-6"><div className="h-8 w-24 bg-bg-main rounded-full" /></td>
-                    <td className="px-8 py-6"><div className="h-8 w-20 bg-bg-main rounded ml-auto" /></td>
+                    <td className="px-6 py-4 md:px-8 md:py-5"><div className="h-4 w-24 bg-bg-main rounded" /></td>
+                    <td className="px-6 py-4 md:px-8 md:py-5"><div className="h-8 w-24 bg-bg-main rounded-full" /></td>
+                    <td className="px-6 py-4 md:px-8 md:py-5"><div className="h-8 w-20 bg-bg-main rounded ml-auto" /></td>
                   </tr>
                 ))
               ) : filteredLoans.length > 0 ? (
                 filteredLoans.map((loan) => (
                   <tr key={loan.id} className="hover:bg-bg-main/30 transition-colors group">
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-4 md:px-8 md:py-5">
                       <span className="text-xs font-mono font-bold text-text-muted opacity-50">#{loan.id}</span>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-4 md:px-8 md:py-5">
                       <div className="flex items-center gap-4">
                         <div className="flex flex-col">
                           <p className="font-bold text-text-main">
@@ -376,7 +376,7 @@ const ManageLoans = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-4 md:px-8 md:py-5">
                       <div className="flex items-center gap-4">
                         <Link 
                           to={`/livro/${loan.book_id}`}
@@ -400,14 +400,14 @@ const ManageLoans = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6 whitespace-nowrap">
+                    <td className="px-6 py-4 md:px-8 md:py-5 whitespace-nowrap">
                       <div className="flex flex-col gap-0.5">
                         <p className="text-sm font-bold text-text-main">{new Date(loan.created_at).toLocaleDateString()}</p>
                         <p className="text-[10px] text-text-muted font-bold opacity-60 uppercase">{new Date(loan.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                       </div>
                     </td>
                     {statusFilter !== 'pending' && (
-                    <td className="px-8 py-6 text-center">
+                    <td className="px-6 py-4 md:px-8 md:py-5 text-center">
                       <div className="flex flex-col items-center gap-2">
                         {(() => {
                           const isOverdue = loan.status === 'active' && loan.due_date && new Date(loan.due_date) < new Date()
@@ -460,7 +460,7 @@ const ManageLoans = () => {
                     </td>
                     )}
                     {statusFilter !== 'all' && statusFilter !== 'returned' && statusFilter !== 'rejected' && (
-                    <td className="px-8 py-6 text-right">
+                    <td className="px-6 py-4 md:px-8 md:py-5 text-right">
                       <div className="flex justify-end gap-2">
                         {loan.status === 'pending' && (
                           <>

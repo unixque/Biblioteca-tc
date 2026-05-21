@@ -26,7 +26,7 @@ function cn(...inputs) {
 }
 
 const StatCard = ({ icon: Icon, label, value, color, sub }) => (
-  <div className="bg-bg-surface p-6 rounded-[2rem] shadow-sm border border-border/50 space-y-4 hover:shadow-md transition-all">
+  <div className="bg-surface-container-lowest p-6 md:p-8 rounded-lg shadow-card-bottom border border-outline-variant space-y-4 hover:shadow-ambient transition-all">
     <div className="flex items-center justify-between">
       <div className={cn("p-3 rounded-2xl", color)}>
         <Icon className="text-white" size={22} />
@@ -120,12 +120,12 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="space-y-4 md:space-y-8">
+    <div className="page-stack">
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 shrink-0">
         {loading ? (
           [...Array(4)].map((_, i) => (
-            <div key={i} className="bg-bg-surface p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-border/50 space-y-4 animate-pulse">
+            <div key={i} className="bg-bg-surface p-6 rounded-lg md:rounded-lg shadow-sm border border-border/50 space-y-4 animate-pulse">
               <div className="w-12 h-12 rounded-2xl bg-bg-main" />
               <div className="space-y-2">
                 <div className="h-3 w-16 bg-bg-main rounded" />
@@ -146,8 +146,8 @@ const AdminDashboard = () => {
       {/* Quick Actions + Recent Loans */}
       <div className="grid lg:grid-cols-3 gap-4 md:gap-8">
         {/* Recent Loans */}
-        <div className="lg:col-span-2 bg-bg-surface rounded-[1.5rem] md:rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden flex flex-col">
-          <div className="px-8 py-6 border-b border-border/50 flex items-center justify-between shrink-0">
+        <div className="lg:col-span-2 bg-bg-surface rounded-lg md:rounded-lg border border-border/50 shadow-sm overflow-hidden flex flex-col">
+          <div className="px-6 py-4 md:px-8 md:py-5 border-b border-border/50 flex items-center justify-between shrink-0">
             <h2 className="font-bold text-text-main">{t('admin.dashboard.recentActivity')}</h2>
             <Link to="/console/emprestimos" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
               {t('admin.dashboard.viewAll')} <ArrowRight size={12} />
@@ -201,44 +201,44 @@ const AdminDashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-[#0a1629] rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden h-full flex flex-col">
-          <div className="absolute top-0 right-0 p-8 opacity-5">
+        <div className="bg-primary rounded-lg p-8 text-on-primary shadow-xl relative overflow-hidden h-full flex flex-col border border-primary-deep">
+          <div className="absolute top-0 right-0 p-8 opacity-10">
             <TrendingUp size={140} />
           </div>
           <div className="relative z-10 flex-grow flex flex-col">
             <div className="grid grid-cols-2 grid-rows-2 gap-4 flex-grow">
               <Link
                 to="/console/livros"
-                className="bg-white/5 hover:bg-white/10 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
+                className="bg-primary-deep/50 hover:bg-primary-deep/70 rounded-lg flex flex-col items-center justify-center gap-3 transition-all border border-on-primary/10 group"
               >
-                <div className="p-3 rounded-2xl bg-primary/20 text-primary group-hover:scale-110 transition-transform">
+                <div className="p-3 rounded-lg bg-on-primary/15 text-on-primary group-hover:scale-110 transition-transform">
                   <BookOpen size={24} />
                 </div>
                 <p className="font-bold text-sm text-center">{t('sidebar.books')}</p>
               </Link>
               <Link
                 to="/console/categorias"
-                className="bg-white/5 hover:bg-white/10 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
+                className="bg-primary-deep/50 hover:bg-primary-deep/70 rounded-lg flex flex-col items-center justify-center gap-3 transition-all border border-on-primary/10 group"
               >
-                <div className="p-3 rounded-2xl bg-orange-500/20 text-orange-400 group-hover:scale-110 transition-transform">
+                <div className="p-3 rounded-lg bg-on-primary/15 text-on-primary group-hover:scale-110 transition-transform">
                   <Tags size={24} />
                 </div>
                 <p className="font-bold text-sm text-center">{t('sidebar.categories')}</p>
               </Link>
               <Link
                 to="/console/emprestimos"
-                className="bg-white/5 hover:bg-white/10 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
+                className="bg-primary-deep/50 hover:bg-primary-deep/70 rounded-lg flex flex-col items-center justify-center gap-3 transition-all border border-on-primary/10 group"
               >
-                <div className="p-3 rounded-2xl bg-purple-500/20 text-purple-400 group-hover:scale-110 transition-transform">
+                <div className="p-3 rounded-lg bg-on-primary/15 text-on-primary group-hover:scale-110 transition-transform">
                   <Library size={24} />
                 </div>
                 <p className="font-bold text-sm text-center">{t('sidebar.loans')}</p>
               </Link>
               <Link
                 to="/console/utilizadores"
-                className="bg-white/5 hover:bg-white/10 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all border border-white/5 group"
+                className="bg-primary-deep/50 hover:bg-primary-deep/70 rounded-lg flex flex-col items-center justify-center gap-3 transition-all border border-on-primary/10 group"
               >
-                <div className="p-3 rounded-2xl bg-green-500/20 text-green-400 group-hover:scale-110 transition-transform">
+                <div className="p-3 rounded-lg bg-on-primary/15 text-on-primary group-hover:scale-110 transition-transform">
                   <ShieldCheck size={24} />
                 </div>
                 <p className="font-bold text-sm text-center">{t('sidebar.users')}</p>

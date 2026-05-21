@@ -1,39 +1,41 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
-import { ChevronRight } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { useLibraryData } from '../context/LibraryDataContext'
 import { useLanguage } from '../context/LanguageContext'
 import BookCard from '../components/BookCard'
-import { clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-import FadeIn from '../components/ui/motion/FadeIn'
-import SlideIn from '../components/ui/motion/SlideIn'
+import Chip from '../components/ui/Chip'
+import SectionHeader from '../components/ui/SectionHeader'
+import SectionDivider from '../components/ui/SectionDivider'
+import MaterialIcon from '../components/ui/MaterialIcon'
+import Button from '../components/ui/Button'
+import CatalogPagination from '../components/ui/CatalogPagination'
 
-function cn(...inputs) {
-  return twMerge(clsx(inputs))
-}
+const CATALOG_PAGE_SIZE = 20
 
 const Home = () => {
   const navigate = useNavigate()
-  const { user, loading: authLoading, refreshSession } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const { t, translateCategory } = useLanguage()
+  const { books, categories, loading, hydrated, loadCatalog } = useLibraryData()
   const [searchParams] = useSearchParams()
   const query = searchParams.get('q') || ''
   const cat = searchParams.get('c') || '0'
 
-  const [books, setBooks] = useState([])
-  const [featuredBooks, setFeaturedBooks] = useState([])
-  const [categories, setCategories] = useState([])
-  const [loading, setLoading] = useState(true)
   const [categoryFilter, setCategoryFilter] = useState(cat)
-  const fetchInProgress = useRef(false)
-  const lastFetchTime = useRef(0)
+  const [catalogPage, setCatalogPage] = useState(1)
   const catalogRef = useRef(null)
+  const recommendedRef = useRef(null)
   const prevQueryLength = useRef(query.length)
 
-  // Auto-scroll to catalog when starting a search
+  const featuredBooks = useMemo(
+    () => books.filter((b) => b.is_featured).slice(0, 6),
+    [books]
+  )
+
+  const showSkeleton = loading && books.length === 0
+
   useEffect(() => {
     if (query.length > 0 && prevQueryLength.current === 0 && catalogRef.current) {
       catalogRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -45,195 +47,176 @@ const Home = () => {
     setCategoryFilter(cat)
   }, [cat])
 
-  const getCoverUrl = (filename) => {
-    if (!filename) return null
-    return supabase.storage.from('capalivro').getPublicUrl(filename).data.publicUrl
-  }
-
-  // Initial load
   useEffect(() => {
     if (!authLoading) {
-      fetchData()
+      loadCatalog({ background: hydrated })
     }
   }, [authLoading, user])
 
-  // Refresh on focus/visibility change
-  useRefreshOnFocus(() => fetchData())
+  useRefreshOnFocus(() => loadCatalog({ background: true }))
 
-  const fetchData = async (catId, retryCount = 0) => {
-    const now = Date.now()
-    
-    // Deadlock breaker: if a fetch claims to be in progress for > 15 seconds, assume it hung
-    if (fetchInProgress.current && now - lastFetchTime.current > 15000) {
-      console.warn('[Home] Fetch lock exceeded 15s. Breaking deadlock.')
-      fetchInProgress.current = false
-    }
-
-    // Throttling: prevent fetches closer than 2 seconds unless it's a manual retry or category change
-    // Note: useRefreshOnFocus has its own 10s throttle, so this 2s one is for general UI actions.
-    if (authLoading || fetchInProgress.current || (retryCount === 0 && !catId && now - lastFetchTime.current < 2000)) {
-      setLoading(false)
-      return
-    }
-    
-    fetchInProgress.current = true
-    lastFetchTime.current = now
-    const currentCat = catId || categoryFilter
-    console.log('[Home] Fetching books for:', currentCat)
-    
-    // Only show global loading spinner if we have absolutely no data
-    if (books.length === 0) {
-      setLoading(true)
-    }
-    
-    try {
-      // 2. Fetch data
-      const [catRes, bookRes] = await Promise.all([
-        supabase.from('categories').select('*').order('display_order', { ascending: true }),
-        supabase.from('books').select('*, categories(name)').order('created_at', { ascending: false })
-      ])
-
-      if (catRes.error) throw catRes.error
-      if (bookRes.error) throw bookRes.error
-
-      setCategories(catRes.data || [])
-      
-      const processedBooks = (bookRes.data || []).map(b => ({
-        ...b,
-        category_name: b.categories?.name,
-        cover_url: getCoverUrl(b.cover_image)
-      }))
-
-      setBooks(processedBooks)
-      setFeaturedBooks(processedBooks.filter(b => b.is_featured).slice(0, 6))
-    } catch (err) {
-      console.warn('[Home] Fetch failed:', err.message || err)
-      
-      // Auto-retry once after 1.5s for transient issues (common on app switch)
-      if (retryCount < 1) {
-        console.log('[Home] Will auto-retry in 1.5s...')
-        fetchInProgress.current = false
-        await new Promise(r => setTimeout(r, 1500))
-        return fetchData(currentCat, retryCount + 1)
-      }
-
-      // Final failure logic
-      if (books.length === 0) {
-        setBooks([]) // This will trigger the "None found" screen
-      }
-    } finally {
-      setLoading(false)
-      fetchInProgress.current = false
-    }
+  const openBook = (bookId) => {
+    const book = books.find((b) => String(b.id) === String(bookId))
+    navigate(`/livro/${bookId}`, book ? { state: { book } } : undefined)
   }
 
-  const filteredBooks = books.filter(b => {
-    const matchesSearch = !query || b.title.toLowerCase().includes(query.toLowerCase()) ||
-      b.author?.toLowerCase().includes(query.toLowerCase())
-    const matchesCategory = categoryFilter === '0' || b.category_id.toString() === categoryFilter
-    return matchesSearch && matchesCategory
-  })
+  const scrollRecommended = (dir) => {
+    if (!recommendedRef.current) return
+    recommendedRef.current.scrollBy({ left: dir * 200, behavior: 'smooth' })
+  }
+
+  const filteredBooks = useMemo(
+    () =>
+      books.filter((b) => {
+        const matchesSearch =
+          !query ||
+          b.title.toLowerCase().includes(query.toLowerCase()) ||
+          b.author?.toLowerCase().includes(query.toLowerCase())
+        const matchesCategory =
+          categoryFilter === '0' || b.category_id.toString() === categoryFilter
+        return matchesSearch && matchesCategory
+      }),
+    [books, query, categoryFilter]
+  )
+
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(filteredBooks.length / CATALOG_PAGE_SIZE)),
+    [filteredBooks.length]
+  )
+
+  // Clamp synchronously so a stale page (e.g. 2) never slices past the new filter
+  const effectivePage = Math.min(catalogPage, totalPages)
+
+  const paginatedBooks = useMemo(() => {
+    const start = (effectivePage - 1) * CATALOG_PAGE_SIZE
+    return filteredBooks.slice(start, start + CATALOG_PAGE_SIZE)
+  }, [filteredBooks, effectivePage])
+
+  useEffect(() => {
+    setCatalogPage(1)
+  }, [query, categoryFilter])
+
+  useEffect(() => {
+    if (catalogPage > totalPages) {
+      setCatalogPage(totalPages)
+    }
+  }, [catalogPage, totalPages])
+
+  const handleCatalogPageChange = (page) => {
+    setCatalogPage(page)
+    catalogRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   return (
-    <div className="space-y-10 pb-12">
-      {/* Recommended */}
+    <div className="page-stack">
       {query.length === 0 && (
-        <section>
-          <FadeIn className="flex items-center justify-between mb-5">
-            <h2 className="text-3xl font-semibold text-text-main">{t('home.recommended')}</h2>
-          </FadeIn>
-          <SlideIn direction="up" delay={0.1}>
-            <div className="flex gap-5 overflow-x-auto pb-4 custom-scrollbar-h px-1">
-            {loading ? (
-              [...Array(4)].map((_, i) => (
-                <div key={i} className="min-w-[200px] aspect-[3/4] bg-bg-surface rounded-[1.75rem] animate-pulse shrink-0" />
-              ))
-            ) : (
-              featuredBooks.map(book => (
-                <BookCard
-                  key={book.id}
-                  book={book}
-                  variant="recommended"
-                  onClick={(id) => navigate(`/livro/${id}`)}
-                />
-              ))
-            )}
-            </div>
-          </SlideIn>
+        <section className="section-inner">
+          <SectionHeader
+            title={t('home.recommended')}
+            subtitle={t('home.catalogSub')}
+            action={
+              <div className="hidden md:flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => scrollRecommended(-1)}
+                  className="w-8 h-8 rounded-full border border-outline flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors"
+                  aria-label="Anterior"
+                >
+                  <MaterialIcon name="chevron_left" size={18} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollRecommended(1)}
+                  className="w-8 h-8 rounded-full border border-outline flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors"
+                  aria-label="Seguinte"
+                >
+                  <MaterialIcon name="chevron_right" size={18} />
+                </button>
+              </div>
+            }
+          />
+          <div
+            ref={recommendedRef}
+            className="flex gap-gutter overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0"
+          >
+            {showSkeleton
+              ? [...Array(4)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="snap-start shrink-0 w-[160px] md:w-[180px] aspect-[2/3] bg-surface-container rounded-lg animate-pulse"
+                  />
+                ))
+              : featuredBooks.map((book) => (
+                  <BookCard
+                    key={book.id}
+                    book={book}
+                    variant="recommended"
+                    onClick={openBook}
+                  />
+                ))}
+          </div>
         </section>
       )}
 
-      {/* Catalog */}
-      <section ref={catalogRef} className="space-y-10 pt-10 scroll-mt-24">
-        <FadeIn className="space-y-1">
-          <h2 className="text-3xl font-black text-text-main tracking-tight">{t('home.catalog')}</h2>
-          <p className="text-text-muted text-lg font-medium mt-1">{t('home.catalogSub')}</p>
-        </FadeIn>
+      <SectionDivider />
 
-        {/* Category Pills */}
-        <SlideIn direction="up" delay={0.1}>
-          <div className="flex gap-2.5 overflow-x-auto pb-4 scrollbar-hide">
-            <button
-            onClick={() => setCategoryFilter('0')}
-            className={cn(
-              "px-4 py-2 rounded-xl text-xs font-medium transition-all shrink-0",
-              categoryFilter === '0'
-                ? "bg-primary text-white shadow-sm"
-                : "bg-bg-surface border border-border/60 text-text-muted hover:border-primary/30 hover:text-primary"
-            )}
-          >
+      <section ref={catalogRef} className="section-inner scroll-mt-28">
+        <SectionHeader title={t('home.catalog')} subtitle={t('home.catalogSub')} />
+
+        <div className="flex flex-wrap gap-2">
+          <Chip active={categoryFilter === '0'} onClick={() => setCategoryFilter('0')}>
             {t('navbar.all')}
-          </button>
-          {categories.map(c => (
-            <button
+          </Chip>
+          {categories.map((c) => (
+            <Chip
               key={c.id}
+              active={categoryFilter === c.id.toString()}
               onClick={() => setCategoryFilter(c.id.toString())}
-              className={cn(
-                "px-4 py-2 rounded-xl text-xs font-medium transition-all shrink-0",
-                categoryFilter === c.id.toString()
-                  ? "bg-primary text-white shadow-sm"
-                  : "bg-bg-surface border border-border/60 text-text-muted hover:border-primary/30 hover:text-primary"
-              )}
             >
               {translateCategory(c.name)}
-            </button>
+            </Chip>
           ))}
-          </div>
-        </SlideIn>
-
-        {/* Book Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 mt-3">
-          {loading ? (
-            [...Array(12)].map((_, i) => (
-              <div key={i} className="aspect-[3/4] bg-bg-surface rounded-2xl animate-pulse" />
-            ))
-          ) : filteredBooks.length > 0 ? (
-            filteredBooks.map(book => (
-              <BookCard
-                key={book.id}
-                book={book}
-                variant="catalog"
-                onClick={(id) => navigate(`/livro/${id}`)}
-              />
-            ))
-          ) : books.length > 0 ? (
-            <div className="col-span-full py-16 text-center space-y-4 bg-bg-surface/50 rounded-2xl border border-dashed border-border/50">
-              <p className="text-text-muted text-sm font-medium">{t('home.noBooksFound')}</p>
-              <p className="text-text-muted/60 text-xs">{t('home.searchNoResults')}</p>
-            </div>
-          ) : (
-            <div className="col-span-full py-16 text-center space-y-4 bg-bg-surface/50 rounded-2xl border border-dashed border-border/50">
-              <p className="text-text-muted text-sm font-medium">{t('home.errorLoad')}</p>
-              <p className="text-text-muted/60 text-xs">{t('home.errorCheckNet')}</p>
-              <button 
-                onClick={() => fetchData()}
-                className="mt-2 px-6 py-2.5 bg-bg-surface border border-border/50 rounded-xl text-xs font-bold text-primary hover:bg-bg-main transition-colors uppercase tracking-wider shadow-sm"
-              >
-                {t('home.retryBtn')}
-              </button>
-            </div>
-          )}
         </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10">
+          {showSkeleton
+            ? [...Array(CATALOG_PAGE_SIZE)].map((_, i) => (
+                <div key={i} className="aspect-[2/3] bg-surface-container rounded-lg animate-pulse" />
+              ))
+            : filteredBooks.length > 0
+              ? paginatedBooks.map((book) => (
+                  <BookCard
+                    key={book.id}
+                    book={book}
+                    variant="catalog"
+                    onClick={openBook}
+                  />
+                ))
+              : books.length > 0
+                ? (
+                    <div className="col-span-full py-12 text-center space-y-3 bg-surface-container-low rounded-lg border border-dashed border-outline-variant card-padding">
+                      <p className="text-body-md text-on-surface-variant">{t('home.noBooksFound')}</p>
+                      <p className="text-body-md text-on-surface-variant/70 text-sm">{t('home.searchNoResults')}</p>
+                    </div>
+                  )
+                : (
+                    <div className="col-span-full py-12 text-center space-y-4 bg-surface-container-low rounded-lg border border-dashed border-outline-variant card-padding">
+                      <p className="text-body-md text-on-surface-variant">{t('home.errorLoad')}</p>
+                      <p className="text-body-md text-on-surface-variant/70 text-sm">{t('home.errorCheckNet')}</p>
+                      <Button variant="secondary" size="sm" onClick={() => loadCatalog({ force: true })}>
+                        {t('home.retryBtn')}
+                      </Button>
+                    </div>
+                  )}
+        </div>
+
+        {!showSkeleton && filteredBooks.length > 0 && (
+          <CatalogPagination
+            page={effectivePage}
+            totalPages={totalPages}
+            onPageChange={handleCatalogPageChange}
+          />
+        )}
       </section>
     </div>
   )

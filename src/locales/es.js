@@ -23,6 +23,8 @@ export default {
     title: 'Escuela Secundaria Tomás Cabreira',
     subtitle: 'Bienvenido al portal digital de nuestra biblioteca. Explore nuestro vasto catálogo de libros, tesis y recursos educativos.',
     exploreBtn: 'Explorar Catálogo',
+    ctaTitle: '¿Listo para pedir un libro?',
+    ctaDesc: 'Cree su cuenta ahora y explore el catálogo digital de la biblioteca.',
     aboutTitle: 'Sobre nuestra Biblioteca',
     aboutDesc: 'La Biblioteca de la Escuela Secundaria Tomás Cabreira es un espacio de aprendizaje, descubrimiento y intercambio. Ahora, con nuestra versión digital, puede consultar la disponibilidad de libros y gestionar sus préstamos desde cualquier lugar.',
     features: {

@@ -1,12 +1,15 @@
-import { useNavigate } from 'react-router-dom'
-import { BookOpen, GraduationCap, Search, ShieldCheck, Globe, ArrowRight, Book, Library, HelpCircle } from 'lucide-react'
+import { useNavigate, Link } from 'react-router-dom'
 import { useLanguage } from '../context/LanguageContext'
 import { useAuth } from '../hooks/useAuth'
-import { Link } from 'react-router-dom'
 import Select from '../components/ui/Select'
-import logo from '../assets/logo.png'
+import Button from '../components/ui/Button'
+import Card from '../components/ui/Card'
+import PageContainer from '../components/ui/PageContainer'
+import MaterialIcon from '../components/ui/MaterialIcon'
+import SectionHeader from '../components/ui/SectionHeader'
 import SlideIn from '../components/ui/motion/SlideIn'
-import FadeIn from '../components/ui/motion/FadeIn'
+import AboutSlideshow from '../components/AboutSlideshow'
+import { ABOUT_SLIDES } from '../lib/staticAssets'
 import Footer from '../components/Footer'
 
 const Landing = () => {
@@ -15,27 +18,13 @@ const Landing = () => {
   const { user } = useAuth()
 
   const features = [
-    {
-      icon: Search,
-      title: t('landing.features.search'),
-      desc: t('landing.features.searchDesc')
-    },
-    {
-      icon: Book,
-      title: t('landing.features.manage'),
-      desc: t('landing.features.manageDesc')
-    },
-    {
-      icon: Globe,
-      title: t('landing.features.access'),
-      desc: t('landing.features.accessDesc')
-    }
+    { icon: 'manage_search', title: t('landing.features.search'), desc: t('landing.features.searchDesc') },
+    { icon: 'auto_stories', title: t('landing.features.manage'), desc: t('landing.features.manageDesc') },
+    { icon: 'hub', title: t('landing.features.access'), desc: t('landing.features.accessDesc') },
   ]
 
   return (
-    <div className="min-h-screen bg-bg-main selection:bg-primary/20 relative">
-
-      {/* Floating Header Controls */}
+    <div className="min-h-screen bg-surface relative">
       <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
         <div className="w-24 sm:w-32">
           <Select
@@ -45,124 +34,156 @@ const Landing = () => {
               { id: 'es', name: 'ES' },
               { id: 'fr', name: 'FR' },
               { id: 'de', name: 'DE' },
-              { id: 'nl', name: 'NL' }
+              { id: 'nl', name: 'NL' },
             ]}
             value={language}
             onChange={setLanguage}
-            triggerClassName="!h-[42px] !px-4 !rounded-xl"
+            triggerClassName="!h-10 !rounded-none"
           />
         </div>
-        <Link to="/docs" className="h-[42px] w-[42px] flex items-center justify-center bg-bg-surface rounded-xl border border-border/40 text-text-muted hover:text-primary hover:border-primary/20 transition-all group" title={t('navbar.docs')}>
-          <HelpCircle size={18} className="transition-transform" />
+        <Link
+          to="/docs"
+          className="h-10 w-10 flex items-center justify-center bg-surface-container-lowest border border-outline-variant rounded-none text-on-surface-variant hover:text-primary hover:border-primary/30 transition-all"
+          title={t('navbar.docs')}
+        >
+          <MaterialIcon name="help" size={20} />
         </Link>
       </div>
 
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-20 pb-20">
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover scale-105"
-          >
+      <section className="relative min-h-screen h-screen flex flex-col justify-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <video autoPlay loop muted playsInline className="w-full h-full object-cover">
             <source src="/media/IMG_3340.MOV" />
           </video>
-          {/* Overlay to ensure text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-bg-main/80 via-bg-main/40 to-bg-main/80" />
-          <div className="absolute inset-0 bg-bg-main/20 backdrop-blur-[1px]" />
+          <div className="absolute inset-0 bg-primary/70 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/40 to-primary/90" />
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center space-y-8">
-          <div className="space-y-4 max-w-4xl mx-auto">
-            <SlideIn direction="up" delay={0.1}>
-              <h1 className="text-4xl md:text-6xl font-black text-text-main tracking-tight leading-[1.1]">
+        <PageContainer className="relative z-10 text-center py-24 md:py-32">
+          <SlideIn direction="up" delay={0.1}>
+            <div className="mb-6 flex items-center justify-center gap-3">
+              <span className="h-px w-12 bg-white/40" />
+              <span className="text-label-sm text-white tracking-widest">
                 {t('landing.title')}
-              </h1>
-            </SlideIn>
-            <SlideIn direction="up" delay={0.2}>
-              <p className="text-lg md:text-xl text-text-muted font-medium max-w-2xl mx-auto leading-relaxed">
-                {t('landing.subtitle')}
-              </p>
-            </SlideIn>
-          </div>
-
-          <SlideIn direction="up" delay={0.3} className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <button
+              </span>
+              <span className="h-px w-12 bg-white/40" />
+            </div>
+          </SlideIn>
+          <SlideIn direction="up" delay={0.15}>
+            <h1 className="text-display-lg-mobile md:text-display-lg text-white mb-6 max-w-3xl mx-auto drop-shadow-md">
+              {t('landing.badge') || 'Biblioteca Digital'}
+            </h1>
+          </SlideIn>
+          <SlideIn direction="up" delay={0.2}>
+            <p className="text-body-lg text-white/90 max-w-2xl mx-auto mb-10 italic">
+              {t('landing.subtitle')}
+            </p>
+          </SlideIn>
+          <SlideIn direction="up" delay={0.3} className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4">
+            <Button
+              variant="surface"
+              size="lg"
+              uppercase
               onClick={() => navigate('/catalogo')}
-              className="group relative px-8 py-4 bg-primary text-white rounded-2xl font-bold flex items-center gap-3 transition-all shadow-xl shadow-primary/20 overflow-hidden"
+              iconRight="arrow_forward"
+              className="group"
             >
-              <div className="absolute inset-0 bg-[rgba(255,255,255,0.1)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 pointer-events-none" />
               {t('landing.exploreBtn')}
-              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-            </button>
+            </Button>
             {!user && (
-              <button
+              <Button
+                variant="heroOutline"
+                size="lg"
+                uppercase
                 onClick={() => navigate('/login')}
-                className="px-8 py-4 bg-bg-surface border border-border/50 text-text-main rounded-2xl font-bold transition-all hover:bg-white hover:border-primary/30"
               >
                 {t('navbar.login')}
-              </button>
+              </Button>
             )}
           </SlideIn>
-        </div>
+        </PageContainer>
       </section>
 
-      {/* Features Grid */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="grid md:grid-cols-3 gap-8">
+      <PageContainer className="py-section-gap">
+        <SectionHeader title="Serviços Académicos" divider className="text-center [&_h2]:text-primary" />
+        <div className="grid md:grid-cols-3 gap-gutter">
           {features.map((feature, idx) => (
             <SlideIn key={idx} direction="up" delay={idx * 0.1} className="h-full">
-              <div
-                className="bg-bg-surface border border-border/40 p-8 rounded-[2.5rem] space-y-4 hover:shadow-2xl hover:shadow-primary/5 transition-all group hover:-translate-y-2 h-full"
-              >
-                <div className="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors duration-500">
-                  <feature.icon size={28} />
+              <Card accent padding="p-8" className="group hover:shadow-ambient transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
+                <div className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center mb-6 text-primary group-hover:scale-110 transition-transform">
+                  <MaterialIcon name={feature.icon} size={28} />
                 </div>
-                <h3 className="text-xl font-bold text-text-main pt-2">{feature.title}</h3>
-                <p className="text-text-muted leading-relaxed font-medium">{feature.desc}</p>
-              </div>
+                <h3 className="text-headline-sm text-on-surface mb-3 group-hover:text-primary transition-colors">
+                  {feature.title}
+                </h3>
+                <p className="text-body-md text-on-surface-variant flex-grow">{feature.desc}</p>
+              </Card>
             </SlideIn>
           ))}
         </div>
+      </PageContainer>
+
+      <section className="bg-surface-container border-y border-outline-variant py-section-gap relative">
+        <div
+          className="absolute inset-0 opacity-[0.03] pointer-events-none"
+          style={{
+            backgroundImage: 'radial-gradient(var(--color-primary) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }}
+        />
+        <PageContainer className="relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <SlideIn direction="left" delay={0.2} className="space-y-8">
+              <span className="text-label-sm text-secondary tracking-widest">{t('landing.aboutTitle')}</span>
+              <h2 className="text-display-lg-mobile md:text-display-lg text-primary leading-tight">
+                {t('landing.aboutTitle')}
+              </h2>
+              <p className="text-body-lg text-on-surface-variant">{t('landing.aboutDesc')}</p>
+              <div className="flex items-center gap-12 pt-4">
+                <div className="border-l-2 border-secondary pl-4">
+                  <span className="text-headline-md text-on-surface">10k+</span>
+                  <p className="text-label-sm text-on-surface-variant mt-1">Livros no Acervo</p>
+                </div>
+                <div className="border-l-2 border-secondary pl-4">
+                  <span className="text-headline-md text-on-surface">100+</span>
+                  <p className="text-label-sm text-on-surface-variant mt-1">Anos de História</p>
+                </div>
+              </div>
+            </SlideIn>
+            <SlideIn direction="right" delay={0.3} className="relative">
+              <div className="relative">
+                <AboutSlideshow slides={ABOUT_SLIDES} />
+                <div className="absolute -bottom-4 -right-4 z-10 bg-primary text-on-primary px-4 py-3 rounded-lg shadow-ambient flex items-center gap-3 pointer-events-none">
+                  <span className="text-xl font-bold font-serif">100+</span>
+                  <span className="text-label-sm tracking-widest">Anos de História</span>
+                </div>
+              </div>
+            </SlideIn>
+          </div>
+        </PageContainer>
       </section>
 
-      {/* About Section */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="bg-bg-surface border border-border/40 rounded-[3rem] p-8 md:p-16 flex flex-col md:flex-row items-center gap-12 overflow-hidden relative">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-
-          <SlideIn direction="left" delay={0.2} className="flex-grow space-y-6 relative z-10">
-            <div className="w-12 h-1 bg-primary rounded-full" />
-            <h2 className="text-3xl md:text-4xl font-black text-text-main tracking-tight">
-              {t('landing.aboutTitle')}
-            </h2>
-            <p className="text-lg text-text-muted leading-relaxed font-medium">
-              {t('landing.aboutDesc')}
-            </p>
-            <div className="flex items-center gap-6 pt-4">
-              <div className="flex flex-col">
-                <span className="text-3xl font-black text-primary">100+</span>
-                <span className="text-xs font-bold text-text-muted uppercase tracking-wider">Anos de História</span>
-              </div>
-              <div className="w-px h-10 bg-border/50" />
-              <div className="flex flex-col">
-                <span className="text-3xl font-black text-primary">10k+</span>
-                <span className="text-xs font-bold text-text-muted uppercase tracking-wider">Livros no Acervo</span>
+      {!user && (
+        <PageContainer className="py-section-gap">
+          <div className="bg-inverse-surface rounded-xl p-12 text-center relative overflow-hidden border border-outline-variant/30">
+            <div className="absolute inset-0 bg-primary/20 mix-blend-multiply pointer-events-none" />
+            <div className="relative z-10">
+              <h2 className="text-headline-md text-white mb-6">{t('landing.ctaTitle')}</h2>
+              <p className="text-body-lg text-white/80 mb-10 max-w-xl mx-auto">
+                {t('landing.ctaDesc')}
+              </p>
+              <div className="flex flex-col sm:flex-row items-stretch justify-center gap-4">
+                <Button variant="primary" size="lg" uppercase onClick={() => navigate('/signup')}>
+                  {t('navbar.register')}
+                </Button>
+                <Button variant="heroOutline" size="lg" uppercase onClick={() => navigate('/catalogo')}>
+                  {t('landing.exploreBtn')}
+                </Button>
               </div>
             </div>
-          </SlideIn>
-
-          <SlideIn direction="right" delay={0.4} className="w-full md:w-[400px] shrink-0 relative group">
-            <img
-              src={logo}
-              alt="School Logo"
-              className="w-full h-full object-contain relative z-10 transition-transform duration-500"
-            />
-          </SlideIn>
-        </div>
-      </section>
+          </div>
+        </PageContainer>
+      )}
 
       <Footer />
     </div>

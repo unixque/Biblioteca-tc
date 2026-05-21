@@ -35,6 +35,8 @@ export default {
     title: 'Escola Secundária Tomás Cabreira',
     subtitle: 'Bem-vindo ao portal digital da nossa biblioteca. Explore o nosso vasto catálogo de livros, teses e recursos educativos.',
     exploreBtn: 'Explorar Catálogo',
+    ctaTitle: 'Pronto para requisitar um livro?',
+    ctaDesc: 'Crie a sua conta agora e explore o catálogo digital da biblioteca.',
     aboutTitle: 'Sobre a nossa Biblioteca',
     aboutDesc: 'A Biblioteca da Escola Secundária Tomás Cabreira é um espaço de aprendizagem, descoberta e partilha. Agora, com a nossa versão digital, pode consultar a disponibilidade de livros e gerir as suas requisições de qualquer lugar.',
     features: {
@@ -292,7 +294,11 @@ export default {
     errorCheckNet: 'Verifique a sua ligação à internet.',
     retryBtn: 'Tentar Novamente',
     noBooksFound: 'Não encontrámos nenhum livro que corresponda à sua pesquisa.',
-    searchNoResults: 'Tente utilizar palavras-chave diferentes ou limpar os filtros.'
+    searchNoResults: 'Tente utilizar palavras-chave diferentes ou limpar os filtros.',
+    paginationLabel: 'Paginação do catálogo',
+    page: 'Página {page}',
+    prevPage: 'Página anterior',
+    nextPage: 'Página seguinte',
   },
   myLoans: {
   title: 'Meus Empréstimos',

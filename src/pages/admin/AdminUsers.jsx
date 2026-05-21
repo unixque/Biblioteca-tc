@@ -112,7 +112,7 @@ const AdminUsers = () => {
   ]
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="page-stack">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
           <h1 className="text-2xl md:text-4xl font-black text-text-main tracking-tight">{t('admin.users.title') || 'Users'}</h1>
@@ -121,27 +121,27 @@ const AdminUsers = () => {
       </div>
 
       {/* Search */}
-      <div className="bg-bg-surface p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] shadow-sm border border-border/50 flex flex-col md:flex-row gap-3 md:gap-4 items-center">
+      <div className="bg-bg-surface p-3 md:p-4 rounded-lg md:rounded-lg shadow-sm border border-border/50 flex flex-col md:flex-row gap-3 md:gap-4 items-center">
         <div className="relative flex-grow w-full">
           <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             placeholder={t('admin.users.searchPlaceholder') || 'Search name or email...'}
-            className="w-full h-12 md:h-14 bg-bg-main/50 border border-transparent rounded-xl md:rounded-[1.25rem] pl-14 pr-6 outline-none focus:bg-bg-surface focus:border-primary/30 transition-all text-sm font-bold"
+            className="w-full h-12 md:h-14 bg-bg-main/50 border border-transparent rounded-xl md:rounded-lg pl-14 pr-6 outline-none focus:bg-bg-surface focus:border-primary/30 transition-all text-sm font-bold"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="hidden md:block bg-bg-surface rounded-[2rem] shadow-sm border border-border/50 overflow-hidden">
+      <div className="hidden md:block bg-bg-surface rounded-lg shadow-sm border border-border/50 overflow-hidden">
         <div className="overflow-x-auto min-h-[400px]">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-bg-main/30">
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.users.nameDetails') || 'USER DETAILS'}</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.users.joined') || 'JOINED'}</th>
-                <th className="px-8 py-6 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.users.role') || 'ROLE'}</th>
+                <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.users.nameDetails') || 'USER DETAILS'}</th>
+                <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.users.joined') || 'JOINED'}</th>
+                <th className="px-6 py-4 md:px-8 md:py-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted">{t('admin.users.role') || 'ROLE'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/30">
@@ -155,7 +155,7 @@ const AdminUsers = () => {
               {loading ? (
                 [...Array(6)].map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-4 md:px-8 md:py-5">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-bg-main" />
                         <div className="flex flex-col gap-2">
@@ -164,8 +164,8 @@ const AdminUsers = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6"><div className="h-4 w-24 bg-bg-main rounded" /></td>
-                    <td className="px-8 py-6"><div className="h-10 w-48 bg-bg-main rounded-xl" /></td>
+                    <td className="px-6 py-4 md:px-8 md:py-5"><div className="h-4 w-24 bg-bg-main rounded" /></td>
+                    <td className="px-6 py-4 md:px-8 md:py-5"><div className="h-10 w-48 bg-bg-main rounded-xl" /></td>
                   </tr>
                 ))
               ) : filteredUsers.length > 0 ? (
@@ -176,7 +176,7 @@ const AdminUsers = () => {
                   
                   return (
                   <tr key={user.id} className="hover:bg-bg-main/30 transition-colors group">
-                    <td className="px-8 py-6 w-1/2">
+                    <td className="px-6 py-4 md:px-8 md:py-5 w-1/2">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-secondary text-primary flex items-center justify-center font-bold text-lg shrink-0">
                           {initial}
@@ -199,14 +199,14 @@ const AdminUsers = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-6 py-4 md:px-8 md:py-5">
                        <div className="flex flex-col gap-1">
                           <p className="text-sm font-medium text-text-main">
                             {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
                           </p>
                        </div>
                     </td>
-                    <td className="px-8 py-6 w-64">
+                    <td className="px-6 py-4 md:px-8 md:py-5 w-64">
                       <div className={cn(
                         "transition-opacity", 
                         updating === user.id ? "opacity-50 pointer-events-none" : "",

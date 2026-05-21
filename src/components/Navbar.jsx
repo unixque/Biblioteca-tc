@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Search, UserCircle, LogOut, Book, List, RefreshCw, PlusCircle, XCircle } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
-import logo from '../assets/logo.png'
+import { LOGO_URL } from '../lib/staticAssets'
 import { useLanguage } from '../context/LanguageContext'
 import SlideIn from './ui/motion/SlideIn'
 
@@ -41,7 +41,7 @@ const Navbar = () => {
       <SlideIn direction="down" duration={0.5} className="h-full">
         <div className="container mx-auto h-full flex items-center justify-between px-4">
         <Link to="/" className="flex-shrink-0">
-          <img src={logo} alt="Logo" className="h-12 transition-opacity hover:opacity-90" />
+          <img src={LOGO_URL} alt="Logo" className="h-12 transition-opacity hover:opacity-90" />
         </Link>
 
         {/* Search Container */}

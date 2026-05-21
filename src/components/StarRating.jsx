@@ -45,7 +45,7 @@ const StarRating = ({
               size={size} 
               className={cn(
                 "transition-colors",
-                isFilled ? "fill-primary text-primary" : "fill-transparent text-text-muted/30"
+                isFilled ? "fill-secondary text-secondary" : "fill-transparent text-on-surface-variant/30"
               )} 
             />
           </button>

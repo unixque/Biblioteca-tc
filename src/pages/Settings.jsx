@@ -8,6 +8,8 @@ import { twMerge } from 'tailwind-merge'
 import { useLanguage } from '../context/LanguageContext'
 import { useNotification } from '../context/NotificationContext'
 import Select from '../components/ui/Select'
+import PageHeader from '../components/ui/PageHeader'
+import SettingsPanel from '../components/ui/SettingsPanel'
 
 function cn(...inputs) {
   return twMerge(clsx(inputs))
@@ -99,28 +101,17 @@ const Settings = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20">
-      {/* Header */}
-      <div className="space-y-1 mb-10">
-        <h1 className="text-4xl font-black text-text-main tracking-tight">{t('settings.title')}</h1>
-        <p className="text-text-muted text-lg font-medium mt-1">{t('settings.subtitle')}</p>
-      </div>
+    <div className="max-w-3xl mx-auto w-full page-stack">
+      <PageHeader title={t('settings.title')} subtitle={t('settings.subtitle')} />
 
-      {/* Profile Section */}
       {user && (
-        <div className="bg-bg-surface rounded-3xl border border-border/50 shadow-sm overflow-hidden">
-          <div className="px-8 py-5 border-b border-border/50">
-            <div className="flex items-center gap-3">
-              <User size={18} className="text-primary" />
-              <h2 className="font-bold text-text-main">{t('settings.profile')}</h2>
-            </div>
-          </div>
-          <div className="px-8 py-6 space-y-5">
+        <SettingsPanel icon={User} title={t('settings.profile')}>
+          <div className="space-y-5">
             <div>
               <label className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted block mb-2">
                 {t('settings.name')}
               </label>
-              <div className="bg-bg-main/40 border border-border/40 rounded-2xl px-5 py-4 text-text-muted font-medium text-sm cursor-not-allowed select-none">
+              <div className="bg-surface-container-low border border-outline-variant rounded-lg px-5 py-4 text-on-surface-variant text-body-md cursor-not-allowed select-none">
                 {user?.user_metadata?.full_name || user?.user_metadata?.display_name || user?.user_metadata?.username || profile?.name || 'Utilizador'}
               </div>
             </div>
@@ -129,24 +120,16 @@ const Settings = () => {
               <label className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted block mb-2">
                 {t('settings.email')}
               </label>
-              <div className="bg-bg-main/60 border border-border/50 rounded-2xl px-5 py-4 text-text-muted font-medium text-sm">
+              <div className="bg-surface-container-low border border-outline-variant rounded-lg px-5 py-4 text-on-surface-variant text-body-md">
                 {user?.email || '—'}
               </div>
             </div>
           </div>
-        </div>
+        </SettingsPanel>
       )}
 
-      {/* Appearance Section */}
-      <div className="bg-bg-surface rounded-3xl border border-border/50 shadow-sm">
-        <div className="px-8 py-5 border-b border-border/50">
-          <div className="flex items-center gap-3">
-            <Sun size={18} className="text-primary" />
-            <h2 className="font-bold text-text-main">{t('settings.appearance')}</h2>
-          </div>
-        </div>
-        {/* Language Selection */}
-        <div className="px-8 py-6 border-b border-border/50">
+      <SettingsPanel icon={Sun} title={t('settings.appearance')}>
+        <div className="space-y-6 pb-6 border-b border-outline-variant mb-6">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted mb-4">{t('settings.languageSection')}</p>
           <Select 
             options={[
@@ -162,17 +145,17 @@ const Settings = () => {
           />
         </div>
 
-        <div className="px-8 py-6">
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-text-muted mb-4">{t('settings.theme')}</p>
+        <div>
+          <p className="text-label-sm text-on-surface-variant mb-4">{t('settings.theme')}</p>
           <div className="grid grid-cols-2 gap-4">
             {/* Light */}
             <button
               onClick={() => setTheme('light')}
               className={cn(
-                "relative flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all",
+                "relative flex flex-col items-center gap-3 p-5 rounded-lg border-2 transition-all",
                 theme === 'light'
                   ? "border-primary bg-primary/5"
-                  : "border-border/50 hover:border-primary/30 bg-bg-main/30"
+                  : "border-outline-variant hover:border-primary/30 bg-surface-container-low"
               )}
             >
               <div className="w-full aspect-[3/2] bg-white rounded-xl border border-border/50 overflow-hidden shadow-sm flex gap-1 p-1.5">
@@ -200,10 +183,10 @@ const Settings = () => {
             <button
               onClick={() => setTheme('dark')}
               className={cn(
-                "relative flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all",
+                "relative flex flex-col items-center gap-3 p-5 rounded-lg border-2 transition-all",
                 theme === 'dark'
                   ? "border-primary bg-primary/5"
-                  : "border-border/50 hover:border-primary/30 bg-bg-main/30"
+                  : "border-outline-variant hover:border-primary/30 bg-surface-container-low"
               )}
             >
               <div className="w-full aspect-[3/2] bg-[#0f172a] rounded-xl border border-white/10 overflow-hidden shadow-sm flex gap-1 p-1.5">
@@ -228,19 +211,10 @@ const Settings = () => {
             </button>
           </div>
         </div>
-      </div>
+      </SettingsPanel>
 
-
-      {/* Feedback Section */}
       {user && (
-        <div className="bg-bg-surface rounded-3xl border border-border/50 shadow-sm overflow-hidden mb-6">
-          <div className="px-8 py-5 border-b border-border/50">
-            <div className="flex items-center gap-3">
-              <MessageSquare size={18} className="text-primary" />
-              <h2 className="font-bold text-text-main">Enviar Feedback</h2>
-            </div>
-          </div>
-          <div className="px-8 py-6">
+        <SettingsPanel icon={MessageSquare} title="Enviar Feedback">
             {!showFeedback ? (
               <div className="flex items-center justify-between">
                 <div>
@@ -261,7 +235,7 @@ const Settings = () => {
                   value={feedbackText}
                   onChange={(e) => setFeedbackText(e.target.value)}
                   placeholder="Descreva o problema que encontrou ou a sua sugestão de melhoria..."
-                  className="w-full bg-bg-main/50 border border-border/50 rounded-2xl p-4 text-sm text-text-main resize-none focus:outline-none focus:border-primary/50 transition-colors min-h-[120px]"
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-4 text-body-md text-on-surface resize-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary input-inset min-h-[120px]"
                 />
                 <div className="flex items-center justify-end gap-3">
                   <button
@@ -286,20 +260,12 @@ const Settings = () => {
                 </div>
               </div>
             )}
-          </div>
-        </div>
+        </SettingsPanel>
       )}
 
-      {/* Account Section */}
       {user && (
-        <div className="bg-bg-surface rounded-3xl border border-border/50 shadow-sm overflow-hidden">
-          <div className="px-8 py-5 border-b border-border/50">
-            <div className="flex items-center gap-3">
-              <LogOut size={18} className="text-accent" />
-              <h2 className="font-bold text-text-main">{t('settings.account')}</h2>
-            </div>
-          </div>
-          <div className="px-8 py-6 flex items-center justify-between">
+        <SettingsPanel icon={LogOut} title={t('settings.account')}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <p className="font-semibold text-text-main text-sm">{t('settings.signOutTitle')}</p>
               <p className="text-text-muted text-xs mt-0.5">{t('settings.signOutDesc')}</p>
@@ -312,7 +278,7 @@ const Settings = () => {
               {t('settings.logoutBtn')}
             </button>
           </div>
-        </div>
+        </SettingsPanel>
       )}
     </div>
   )

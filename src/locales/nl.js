@@ -23,6 +23,8 @@ export default {
     title: 'Middelbare School Tomás Cabreira',
     subtitle: 'Welkom bij het digitale portaal van onze bibliotheek. Verken onze uitgebreide catalogus met boeken, scripties en educatieve bronnen.',
     exploreBtn: 'Catalogus verkennen',
+    ctaTitle: 'Klaar om een boek te lenen?',
+    ctaDesc: 'Maak nu uw account aan en verken de digitale catalogus van de bibliotheek.',
     aboutTitle: 'Over onze Bibliotheek',
     aboutDesc: 'De bibliotheek van de middelbare school Tomás Cabreira is een plek voor leren, ontdekken en delen. Nu kunt u met onze digitale versie overal de beschikbaarheid van boeken controleren en uw aanvragen beheren.',
     features: {
