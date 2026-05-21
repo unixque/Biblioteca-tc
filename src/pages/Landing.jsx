@@ -58,26 +58,31 @@ const Landing = () => {
       </div>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-24 md:pt-20 md:pb-32">
-        {/* Background Decorative Elements */}
-        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+      <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-20 pb-20">
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover scale-105"
+          >
+            <source src="/media/IMG_3340.MOV" />
+          </video>
+          {/* Overlay to ensure text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-bg-main/80 via-bg-main/40 to-bg-main/80" />
+          <div className="absolute inset-0 bg-bg-main/20 backdrop-blur-[1px]" />
+        </div>
 
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center space-y-8">
-          <div className="flex justify-center mb-20">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-bold text-xs uppercase tracking-[0.2em] animate-fade-in">
-              <Library size={14} /> {t('landing.badge')}
-            </div>
-          </div>
-
           <div className="space-y-4 max-w-4xl mx-auto">
             <SlideIn direction="up" delay={0.1}>
-              <h1 className="text-5xl md:text-7xl font-black text-text-main tracking-tight leading-[1.1]">
+              <h1 className="text-4xl md:text-6xl font-black text-text-main tracking-tight leading-[1.1]">
                 {t('landing.title')}
               </h1>
             </SlideIn>
             <SlideIn direction="up" delay={0.2}>
-              <p className="text-xl md:text-2xl text-text-muted font-medium max-w-2xl mx-auto leading-relaxed">
+              <p className="text-lg md:text-xl text-text-muted font-medium max-w-2xl mx-auto leading-relaxed">
                 {t('landing.subtitle')}
               </p>
             </SlideIn>
