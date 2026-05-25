@@ -93,7 +93,7 @@ const Notifications = () => {
                   !n.read ? 'bg-primary/5' : 'hover:bg-surface-container-low'
                 )}
               >
-                <MaterialIcon name={iconFor(n.type)} size={22} className="shrink-0 mt-0.5 text-primary" />
+                <MaterialIcon name={iconFor(n.type)} size={22} filled className="shrink-0 mt-0.5 text-primary" />
                 <div className="flex-1 space-y-1 min-w-0">
                   <div className="flex justify-between items-start gap-4">
                     <h3

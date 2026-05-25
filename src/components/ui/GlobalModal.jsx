@@ -5,7 +5,7 @@ import { cn } from '../../lib/cn'
 import { useNotification } from '../../context/NotificationContext'
 
 const iconMap = {
-  warning: 'warning',
+  warning: 'report_problem',
   danger: 'shield',
   success: 'check_circle',
   info: 'info',
@@ -47,7 +47,7 @@ const GlobalModal = () => {
                   (!modal.type || modal.type === 'info') && 'bg-primary/10 text-primary'
                 )}
               >
-                <MaterialIcon name={iconMap[modal.type] || 'info'} size={24} />
+                <MaterialIcon name={iconMap[modal.type] || 'info'} size={24} filled />
               </div>
               <div className="pt-1 flex-grow">
                 <h3 className="text-headline-sm text-on-surface leading-tight">{modal.title}</h3>
