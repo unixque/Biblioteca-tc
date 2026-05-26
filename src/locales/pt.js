@@ -67,7 +67,21 @@ export default {
     account: 'Conta',
     signOutTitle: 'Sair da conta',
     signOutDesc: 'Será redirecionado para a página de login',
-    logoutBtn: 'Sair'
+    logoutBtn: 'Sair',
+    feedback: {
+      title: 'Enviar Feedback',
+      question: 'Problemas ou Sugestões?',
+      questionDesc: 'Ajude-nos a melhorar a plataforma descrevendo a sua experiência.',
+      writeBtn: 'Escrever',
+      viewTitle: 'Ver Feedbacks Recebidos',
+      viewDesc: 'Consulte as sugestões e problemas reportados pelos utilizadores.',
+      viewBtn: 'Ver Feedbacks',
+      placeholder: 'Descreva o problema que encontrou ou a sua sugestão de melhoria...',
+      cancelBtn: 'Cancelar',
+      sendBtn: 'Enviar Feedback',
+      errorToast: 'Erro ao enviar feedback',
+      successToast: 'Obrigado pelo seu feedback!'
+    }
   },
   routes: {
     login: '/entrar',
@@ -255,11 +269,31 @@ export default {
     averageRating: 'Média de Avaliações',
     reviewSuccess: 'Avaliação submetida com sucesso!',
     reviewError: 'Erro ao submeter a avaliação. Tente novamente.',
-    youReviewed: 'Você avaliou este livro'
+    youReviewed: 'Você avaliou este livro',
+    catalog: 'Catálogo',
+    availability: 'Disponibilidade',
+    availableForRequest: 'Disponível para requisição',
+    alreadyRequested: 'Já Requisitado',
+    waitingApproval: 'Aguardando aprovação do administrador',
+    review: 'avaliação',
+    reviews: 'avaliações',
+    deleteReviewTitle: 'Apagar Avaliação',
+    deleteReviewConfirm: 'Tem a certeza que deseja apagar esta avaliação?',
+    deleteReviewSuccess: 'Avaliação apagada com sucesso.',
+    deleteReviewError: 'Erro ao apagar avaliação.',
+    anonymousUser: 'Utilizador',
+    requestError: 'Erro ao requisitar livro',
+    processError: 'Erro ao processar o seu pedido.',
+    featuredError: 'Erro ao actualizar destaque',
+    featuredAdded: 'Livro marcado como destaque ⭐',
+    featuredRemoved: 'Destaque removido',
+    emailSubject: 'Reserva Registada',
+    emailMessage: 'O seu pedido de reserva para o livro "{title}" foi recebido e aguarda aprovação. Terá 12 horas para levantar o livro na biblioteca antes que a reserva expire automaticamente.',
+    emailButtonText: 'Ver os meus empréstimos'
   },
   docs: {
     badge: 'Documentação Oficial',
-    title: 'Guia da Biblioteca',
+    title: 'Documentação da Biblioteca',
     subtitle: 'Tudo o que precisa de saber para utilizar a Biblioteca Digital de forma eficiente.',
     borrow: {
       title: '1. Como Requisitar um Livro',
@@ -271,7 +305,7 @@ export default {
     },
     duration: {
       title: '3. Duração do Empréstimo',
-      desc: 'O período normal de empréstimo para qualquer livro do nosso catálogo é de 14 dias.',
+      desc: 'O período normal de empréstimo para qualquer livro do nosso catálogo é de 14 dias. Será avisado um dia antes do prazo limite por e-mail e notificações na plataforma.',
     },
     ai: {
       title: '4. Resumos por IA',
@@ -284,7 +318,86 @@ export default {
     feedback: {
       title: '6. Feedback e Suporte',
       desc: 'Se encontrar algum erro no site, tiver dúvidas sobre o seu funcionamento ou quiser sugerir melhorias, utilize o botão "Enviar Feedback" nas suas Definições.',
-    }
+    },
+    privacy: {
+      title: 'Política de Privacidade',
+      content: `
+        <h3>1. Responsável pelo Tratamento</h3>
+        <p>O Agrupamento de Escolas Tomás Cabreira, sediado em Faro, Portugal, é o responsável pelo tratamento dos dados pessoais recolhidos através desta plataforma de biblioteca digital.</p>
+
+        <h3>2. Dados Recolhidos</h3>
+        <p>Recolhemos apenas os dados estritamente necessários para a prestação do serviço:</p>
+        <ul>
+          <li>Nome completo e endereço de e-mail (para identificação e comunicação);</li>
+          <li>Histórico de requisições e devoluções (para gestão de empréstimos);</li>
+          <li>Dados técnicos de acesso, como endereço IP e tipo de navegador (para segurança e diagnóstico).</li>
+        </ul>
+
+        <h3>3. Finalidade do Tratamento</h3>
+        <p>Os dados recolhidos são utilizados exclusivamente para:</p>
+        <ul>
+          <li>Gestão de contas e autenticação de utilizadores;</li>
+          <li>Processamento e acompanhamento de pedidos de empréstimo;</li>
+          <li>Envio de notificações relacionadas com a sua conta (aprovações, prazos, devoluções);</li>
+          <li>Melhoria contínua dos nossos serviços.</li>
+        </ul>
+
+        <h3>4. Partilha de Dados</h3>
+        <p>Os seus dados pessoais não são vendidos, alugados ou partilhados com terceiros para fins comerciais. Poderão ser partilhados apenas com autoridades competentes quando exigido por lei ou ordem judicial.</p>
+
+        <h3>5. Segurança</h3>
+        <p>Implementamos medidas técnicas e organizacionais adequadas para proteger os seus dados contra acesso não autorizado, perda ou destruição, incluindo encriptação e controlo de acessos.</p>
+
+        <h3>6. Os Seus Direitos</h3>
+        <p>Ao abrigo do RGPD, tem direito a aceder, corrigir, eliminar ou restringir o tratamento dos seus dados. Para exercer estes direitos, contacte-nos através do botão "Enviar Feedback" nas Definições.</p>
+
+        <h3>7. Retenção de Dados</h3>
+        <p>Os dados são conservados enquanto a conta estiver ativa ou pelo tempo necessário ao cumprimento de obrigações legais. Após pedido de eliminação, os dados são removidos num prazo máximo de 30 dias.</p>
+
+        <h3>8. Cookies</h3>
+        <p>Utilizamos apenas cookies técnicos essenciais para o funcionamento da plataforma (sessão de autenticação). Não utilizamos cookies de rastreamento ou publicidade.</p>
+
+        <p><em>Última atualização: 25/05/2026</em></p>
+      `
+    },
+    terms: {
+      title: 'Termos & Condições',
+      content: `
+        <h3>1. Aceitação dos Termos</h3>
+        <p>Ao registar-se e utilizar a plataforma de Biblioteca Digital do Agrupamento de Escolas Tomás Cabreira, declara ter lido, compreendido e aceite os presentes Termos e Condições.</p>
+
+        <h3>2. Elegibilidade</h3>
+        <p>O serviço destina-se exclusivamente a alunos, professores e funcionários do Agrupamento de Escolas Tomás Cabreira. O registo com dados falsos ou por parte de utilizadores não autorizados será imediatamente cancelado.</p>
+
+        <h3>3. Requisição de Livros</h3>
+        <ul>
+          <li>Cada utilizador pode ter até um (1) empréstimo ativo de cada vez;</li>
+          <li>Após aprovação, o utilizador tem <strong>12 horas</strong> para levantar o livro na biblioteca física;</li>
+          <li>O prazo máximo de empréstimo é de <strong>14 dias corridos</strong> a partir da data de levantamento;</li>
+          <li>O PIN de 4 dígitos atribuído é pessoal e intransmissível, sendo necessário para efetuar a devolução.</li>
+        </ul>
+
+        <h3>4. Devoluções e Multas</h3>
+        <p>A devolução fora do prazo estabelecido implica uma multa única de <strong>5,00€</strong>. O pagamento deve ser efetuado presencialmente na biblioteca. Enquanto existirem multas por liquidar, o utilizador não poderá efetuar novas requisições.</p>
+
+        <h3>5. Responsabilidade do Utilizador</h3>
+        <p>O utilizador é responsável pela conservação do livro durante o período de empréstimo. Danos, perdas ou deterioração do livro poderão implicar o pagamento do valor de reposição da obra.</p>
+
+        <h3>6. Propriedade Intelectual</h3>
+        <p>Todo o conteúdo disponível na plataforma, incluindo textos, imagens e metadados, é protegido por direitos de autor. A reprodução, distribuição ou uso comercial sem autorização expressa é estritamente proibida.</p>
+
+        <h3>7. Suspensão de Conta</h3>
+        <p>A administração reserva-se o direito de suspender ou eliminar contas em caso de uso indevido da plataforma, incumprimento dos presentes termos ou comportamento prejudicial à comunidade escolar.</p>
+
+        <h3>8. Limitação de Responsabilidade</h3>
+        <p>O Agrupamento não se responsabiliza por interrupções temporárias do serviço, perda de dados por falha técnica ou danos indiretos decorrentes do uso da plataforma.</p>
+
+        <h3>9. Alterações aos Termos</h3>
+        <p>Reservamo-nos o direito de atualizar estes termos a qualquer momento. Os utilizadores serão notificados sobre alterações significativas. A utilização continuada da plataforma após a notificação constitui aceitação dos novos termos.</p>
+
+        <p><em>Última atualização: 25/05/2026</em></p>
+      `
+    },
   },
   home: {
     recommended: 'Recomendados',
@@ -339,6 +452,29 @@ auth: {
     subtitle: 'Fique a par das atualizações da sua biblioteca',
     emptyTitle: 'Tudo em dia!',
     emptyDesc: 'Ainda não tem notificações. Quando houver avisos sobre empréstimos ou novos livros, aparecerão aqui.',
-    exploreCatalog: 'Explorar Catálogo'
+    exploreCatalog: 'Explorar Catálogo',
+    markAllAsRead: 'Marcar todas como lidas',
+    templates: {
+      approvedTitle: 'Empréstimo Aprovado',
+      approvedMsg: 'O seu pedido de empréstimo para o livro "{book}" foi aprovado. O livro encontra-se disponível para levantamento.',
+      rejectedTitle: 'Empréstimo Rejeitado',
+      rejectedMsg: 'O seu pedido de empréstimo para o livro "{book}" não pôde ser aprovado neste momento.',
+      returnedTitle: 'Livro Devolvido',
+      returnedMsg: 'Confirmamos a devolução do livro "{book}". Obrigado pela leitura!',
+      warningTitle: 'Aviso de Devolução Próxima',
+      warningMsg: 'Lembramos que o livro "{book}" deve ser devolvido amanhã. Por favor, entregue-o na biblioteca.',
+      registeredTitle: 'Reserva Registada',
+      registeredMsg: 'O seu pedido de reserva para o livro "{book}" foi recebido e aguarda aprovação. Terá 12 horas para levantar o livro na biblioteca antes que a reserva expire automaticamente.'
+    }
+  },
+  footer: {
+    groupName: 'Agrupamento de Escolas',
+    contacts: 'Contactos',
+    usefulLinks: 'Links Úteis',
+    platform: 'Plataforma Sdurão',
+    moodle: 'Moodle Agrupamento',
+    website: 'Website Oficial',
+    docs: 'Documentação',
+    rights: '© {year} Agrupamento de Escolas Tomás Cabreira, em Faro. Todos os direitos reservados.'
   }
 }

@@ -67,7 +67,21 @@ export default {
     account: 'Account',
     signOutTitle: 'Sign out',
     signOutDesc: 'You\'ll be redirected to the login page',
-    logoutBtn: 'Logout'
+    logoutBtn: 'Logout',
+    feedback: {
+      title: 'Send Feedback',
+      question: 'Issues or Suggestions?',
+      questionDesc: 'Help us improve the platform by describing your experience.',
+      writeBtn: 'Write',
+      viewTitle: 'View Received Feedback',
+      viewDesc: 'Review suggestions and issues reported by users.',
+      viewBtn: 'View Feedback',
+      placeholder: 'Describe the issue you found or your improvement suggestion...',
+      cancelBtn: 'Cancel',
+      sendBtn: 'Send Feedback',
+      errorToast: 'Error sending feedback',
+      successToast: 'Thank you for your feedback!'
+    }
   },
   routes: {
     login: '/login',
@@ -255,11 +269,31 @@ export default {
     averageRating: 'Average Rating',
     reviewSuccess: 'Review submitted successfully!',
     reviewError: 'Failed to submit review. Please try again.',
-    youReviewed: 'You reviewed this book'
+    youReviewed: 'You reviewed this book',
+    catalog: 'Catalog',
+    availability: 'Availability',
+    availableForRequest: 'Available for request',
+    alreadyRequested: 'Already Requested',
+    waitingApproval: 'Waiting for administrator approval',
+    review: 'review',
+    reviews: 'reviews',
+    deleteReviewTitle: 'Delete Review',
+    deleteReviewConfirm: 'Are you sure you want to delete this review?',
+    deleteReviewSuccess: 'Review deleted successfully.',
+    deleteReviewError: 'Error deleting review.',
+    anonymousUser: 'User',
+    requestError: 'Error requesting book',
+    processError: 'Error processing your request.',
+    featuredError: 'Error updating featured status',
+    featuredAdded: 'Book featured successfully ⭐',
+    featuredRemoved: 'Featured status removed',
+    emailSubject: 'Reservation Registered',
+    emailMessage: 'Your request to reserve the book "{title}" was received and is awaiting approval. You will have 12 hours to pick up the book at the physical library before the reservation automatically expires.',
+    emailButtonText: 'View my loans'
   },
   docs: {
     badge: 'Official Documentation',
-    title: 'Library Guide',
+    title: 'Library Documentation',
     subtitle: 'Everything you need to know to use the Digital Library efficiently.',
     borrow: {
       title: '1. How to Borrow a Book',
@@ -271,7 +305,7 @@ export default {
     },
     duration: {
       title: '3. Borrow Duration',
-      desc: 'The standard loan period for any book in our catalog is 14 days.',
+      desc: 'The standard loan period for any book in our catalog is 14 days. You will be notified one day before the deadline via email and in-app notifications.',
     },
     ai: {
       title: '4. AI Descriptions',
@@ -284,7 +318,86 @@ export default {
     feedback: {
       title: '6. Feedback and Support',
       desc: 'If you encounter any error on the site, have doubts about how it works, or want to suggest improvements, use the "Send Feedback" button in your Settings.',
-    }
+    },
+    privacy: {
+        title: 'Privacy Policy',
+        content: `
+          <h3>1. Data Controller</h3>
+          <p>Agrupamento de Escolas Tomás Cabreira, located in Faro, Portugal, is the controller responsible for the personal data collected through this digital library platform.</p>
+
+          <h3>2. Data We Collect</h3>
+          <p>We collect only the data strictly necessary to provide the service:</p>
+          <ul>
+            <li>Full name and email address (for identification and communication);</li>
+            <li>Loan and return history (for loan management);</li>
+            <li>Technical access data such as IP address and browser type (for security and diagnostics).</li>
+          </ul>
+
+          <h3>3. Purpose of Processing</h3>
+          <p>The data collected is used exclusively to:</p>
+          <ul>
+            <li>Manage accounts and authenticate users;</li>
+            <li>Process and track loan requests;</li>
+            <li>Send notifications related to your account (approvals, deadlines, returns);</li>
+            <li>Continuously improve our services.</li>
+          </ul>
+
+          <h3>4. Data Sharing</h3>
+          <p>Your personal data is not sold, rented, or shared with third parties for commercial purposes. It may only be shared with competent authorities when required by law or court order.</p>
+
+          <h3>5. Security</h3>
+          <p>We implement appropriate technical and organisational measures to protect your data against unauthorised access, loss, or destruction, including encryption and access controls.</p>
+
+          <h3>6. Your Rights</h3>
+          <p>Under the GDPR, you have the right to access, correct, delete, or restrict the processing of your data. To exercise these rights, contact us via the "Send Feedback" button in Settings.</p>
+
+          <h3>7. Data Retention</h3>
+          <p>Data is retained while your account is active or for as long as necessary to fulfil legal obligations. After a deletion request, data is removed within a maximum of 30 days.</p>
+
+          <h3>8. Cookies</h3>
+          <p>We use only technically essential cookies required for the platform to function (authentication session). We do not use tracking or advertising cookies.</p>
+
+          <p><em>Last updated: 25/05/2026</em></p>
+        `
+    },
+    terms: {
+        title: 'Terms & Conditions',
+        content: `
+          <h3>1. Acceptance of Terms</h3>
+          <p>By registering and using the Digital Library platform of Agrupamento de Escolas Tomás Cabreira, you confirm that you have read, understood, and accepted these Terms and Conditions.</p>
+
+          <h3>2. Eligibility</h3>
+          <p>This service is exclusively for students, teachers, and staff of Agrupamento de Escolas Tomás Cabreira. Registration with false information or by unauthorised users will be immediately cancelled.</p>
+
+          <h3>3. Borrowing Books</h3>
+          <ul>
+            <li>Each user may have up to one (1) active loan at a time;</li>
+            <li>After approval, the user has <strong>12 hours</strong> to pick up the book at the physical library;</li>
+            <li>The maximum loan period is <strong>14 calendar days</strong> from the pickup date;</li>
+            <li>The 4-digit PIN assigned is personal and non-transferable, and is required to complete the return.</li>
+          </ul>
+
+          <h3>4. Returns and Fines</h3>
+          <p>Returning a book after the established deadline incurs a single fine of <strong>€5.00</strong>. Payment must be made in person at the library. While unpaid fines exist, the user may not make new loan requests.</p>
+
+          <h3>5. User Responsibility</h3>
+          <p>The user is responsible for the proper care of the book during the loan period. Damage, loss, or deterioration of the book may result in payment of the book's replacement value.</p>
+
+          <h3>6. Intellectual Property</h3>
+          <p>All content available on the platform, including texts, images, and metadata, is protected by copyright. Reproduction, distribution, or commercial use without express authorisation is strictly prohibited.</p>
+
+          <h3>7. Account Suspension</h3>
+          <p>The administration reserves the right to suspend or delete accounts in cases of misuse of the platform, breach of these terms, or behaviour harmful to the school community.</p>
+
+          <h3>8. Limitation of Liability</h3>
+          <p>The School Group is not responsible for temporary service interruptions, data loss due to technical failure, or indirect damages arising from the use of the platform.</p>
+
+          <h3>9. Changes to Terms</h3>
+          <p>We reserve the right to update these terms at any time. Users will be notified of significant changes. Continued use of the platform after notification constitutes acceptance of the new terms.</p>
+
+          <p><em>Last updated: 25/05/2026</em></p>
+        `
+    },
   },
   home: {
     recommended: 'Recommended',
@@ -339,6 +452,29 @@ auth: {
     subtitle: 'Stay up to date with your library',
     emptyTitle: 'All caught up!',
     emptyDesc: 'You have no notifications yet. Any updates about loans or new books will appear here.',
-    exploreCatalog: 'Explore Catalog'
+    exploreCatalog: 'Explore Catalog',
+    markAllAsRead: 'Mark all as read',
+    templates: {
+      approvedTitle: 'Loan Approved',
+      approvedMsg: 'Your loan request for the book "{book}" has been approved. The book is now available for pickup.',
+      rejectedTitle: 'Loan Rejected',
+      rejectedMsg: 'Your loan request for the book "{book}" could not be approved at this time.',
+      returnedTitle: 'Book Returned',
+      returnedMsg: 'We confirm the return of the book "{book}". Thank you for reading!',
+      warningTitle: 'Return Notice',
+      warningMsg: 'We remind you that the book "{book}" must be returned tomorrow. Please deliver it to the library.',
+      registeredTitle: 'Reservation Registered',
+      registeredMsg: 'Your reservation request for the book "{book}" has been received and is awaiting approval. You will have 12 hours to pick up the book at the library before the reservation automatically expires.'
+    }
+  },
+  footer: {
+    groupName: 'School Group',
+    contacts: 'Contacts',
+    usefulLinks: 'Useful Links',
+    platform: 'Sdurão Platform',
+    moodle: 'Group Moodle',
+    website: 'Official Website',
+    docs: 'Documentation',
+    rights: '© {year} Agrupamento de Escolas Tomás Cabreira, in Faro. All rights reserved.'
   }
 }

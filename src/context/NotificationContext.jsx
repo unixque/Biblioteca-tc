@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, useCallback } from 'react'
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import GlobalModal from '../components/ui/GlobalModal'
 import ToastContainer from '../components/ui/ToastContainer'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../hooks/useAuth'
 
 const NotificationContext = createContext({})
 
@@ -9,6 +11,32 @@ export const useNotification = () => useContext(NotificationContext)
 export const NotificationProvider = ({ children }) => {
   const [toast, setToast] = useState(null)
   const [modal, setModal] = useState(null)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const { user } = useAuth()
+
+  const refreshUnread = useCallback(async () => {
+    if (!user) { setUnreadCount(0); return }
+    const { count } = await supabase
+      .from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('read', false)
+    setUnreadCount(count || 0)
+  }, [user])
+
+  useEffect(() => {
+    refreshUnread()
+    if (!user) return
+    const channel = supabase
+      .channel('unread_badge')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        () => refreshUnread()
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [user, refreshUnread])
 
   const showToast = useCallback((message, type = 'success', duration = 3000) => {
     const id = Date.now()
@@ -61,7 +89,7 @@ export const NotificationProvider = ({ children }) => {
   }, [])
 
   return (
-    <NotificationContext.Provider value={{ showToast, confirm, prompt: promptMessage, toast, modal, setModal }}>
+    <NotificationContext.Provider value={{ showToast, confirm, prompt: promptMessage, toast, modal, setModal, unreadCount, refreshUnread }}>
       {children}
       <GlobalModal />
       <ToastContainer />

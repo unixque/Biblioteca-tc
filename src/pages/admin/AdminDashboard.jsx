@@ -15,7 +15,8 @@ import {
   Plus,
   Tags,
   ShieldCheck,
-  Library
+  Library,
+  MessageSquare
 } from 'lucide-react'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -206,10 +207,10 @@ const AdminDashboard = () => {
             <TrendingUp size={140} />
           </div>
           <div className="relative z-10 flex-grow flex flex-col">
-            <div className="grid grid-cols-2 grid-rows-2 gap-4 flex-grow">
+            <div className="grid grid-cols-2 gap-4 flex-grow">
               <Link
                 to="/console/livros"
-                className="bg-primary-deep/50 hover:bg-primary-deep/70 rounded-lg flex flex-col items-center justify-center gap-3 transition-all border border-on-primary/10 group"
+                className="bg-primary-deep/50 hover:bg-primary-deep/70 rounded-lg flex flex-col items-center justify-center gap-3 transition-all border border-on-primary/10 group py-4"
               >
                 <div className="p-3 rounded-lg bg-on-primary/15 text-on-primary group-hover:scale-110 transition-transform">
                   <BookOpen size={24} />
@@ -218,7 +219,7 @@ const AdminDashboard = () => {
               </Link>
               <Link
                 to="/console/categorias"
-                className="bg-primary-deep/50 hover:bg-primary-deep/70 rounded-lg flex flex-col items-center justify-center gap-3 transition-all border border-on-primary/10 group"
+                className="bg-primary-deep/50 hover:bg-primary-deep/70 rounded-lg flex flex-col items-center justify-center gap-3 transition-all border border-on-primary/10 group py-4"
               >
                 <div className="p-3 rounded-lg bg-on-primary/15 text-on-primary group-hover:scale-110 transition-transform">
                   <Tags size={24} />
@@ -227,7 +228,7 @@ const AdminDashboard = () => {
               </Link>
               <Link
                 to="/console/emprestimos"
-                className="bg-primary-deep/50 hover:bg-primary-deep/70 rounded-lg flex flex-col items-center justify-center gap-3 transition-all border border-on-primary/10 group"
+                className="bg-primary-deep/50 hover:bg-primary-deep/70 rounded-lg flex flex-col items-center justify-center gap-3 transition-all border border-on-primary/10 group py-4"
               >
                 <div className="p-3 rounded-lg bg-on-primary/15 text-on-primary group-hover:scale-110 transition-transform">
                   <Library size={24} />
@@ -236,12 +237,21 @@ const AdminDashboard = () => {
               </Link>
               <Link
                 to="/console/utilizadores"
-                className="bg-primary-deep/50 hover:bg-primary-deep/70 rounded-lg flex flex-col items-center justify-center gap-3 transition-all border border-on-primary/10 group"
+                className="bg-primary-deep/50 hover:bg-primary-deep/70 rounded-lg flex flex-col items-center justify-center gap-3 transition-all border border-on-primary/10 group py-4"
               >
                 <div className="p-3 rounded-lg bg-on-primary/15 text-on-primary group-hover:scale-110 transition-transform">
                   <ShieldCheck size={24} />
                 </div>
                 <p className="font-bold text-sm text-center">{t('sidebar.users')}</p>
+              </Link>
+              <Link
+                to="/console/feedback"
+                className="col-span-2 bg-primary-deep/50 hover:bg-primary-deep/70 rounded-lg flex items-center justify-center gap-3 transition-all border border-on-primary/10 group py-3"
+              >
+                <div className="p-2.5 rounded-lg bg-on-primary/15 text-on-primary group-hover:scale-110 transition-transform">
+                  <MessageSquare size={20} />
+                </div>
+                <p className="font-bold text-sm text-center">{t('sidebar.feedback')}</p>
               </Link>
             </div>
           </div>

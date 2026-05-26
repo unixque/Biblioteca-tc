@@ -92,9 +92,9 @@ const Settings = () => {
     
     if (error) {
        console.error(error)
-       showToast('Erro ao enviar feedback', 'danger')
+       showToast(t('settings.feedback.errorToast'), 'danger')
     } else {
-       showToast('Obrigado pelo seu feedback!', 'success')
+       showToast(t('settings.feedback.successToast'), 'success')
        setFeedbackText('')
        setShowFeedback(false)
     }
@@ -214,27 +214,48 @@ const Settings = () => {
       </SettingsPanel>
 
       {user && (
-        <SettingsPanel icon={MessageSquare} title="Enviar Feedback">
+        <SettingsPanel icon={MessageSquare} title={t('settings.feedback.title')}>
             {!showFeedback ? (
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-text-main text-sm">Problemas ou Sugestões?</p>
-                  <p className="text-text-muted text-xs mt-0.5">Ajude-nos a melhorar a plataforma descrevendo a sua experiência.</p>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-text-main text-sm">{t('settings.feedback.question')}</p>
+                    <p className="text-text-muted text-xs mt-0.5">{t('settings.feedback.questionDesc')}</p>
+                  </div>
+                  <button
+                    onClick={() => setShowFeedback(true)}
+                    className="flex items-center gap-2 px-5 py-3 bg-primary/10 text-primary hover:bg-primary/20 rounded-2xl font-bold text-sm transition-all active:scale-95 shrink-0"
+                  >
+                    <MessageSquare size={15} />
+                    {t('settings.feedback.writeBtn')}
+                  </button>
                 </div>
-                <button
-                  onClick={() => setShowFeedback(true)}
-                  className="flex items-center gap-2 px-5 py-3 bg-primary/10 text-primary hover:bg-primary/20 rounded-2xl font-bold text-sm transition-all active:scale-95"
-                >
-                  <MessageSquare size={15} />
-                  Escrever
-                </button>
+
+                {isAdmin && (
+                  <div className="pt-4 border-t border-outline-variant flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-text-main text-sm flex items-center gap-2">
+                        <Shield size={16} className="text-primary" />
+                        {t('settings.feedback.viewTitle')}
+                      </p>
+                      <p className="text-text-muted text-xs mt-0.5">{t('settings.feedback.viewDesc')}</p>
+                    </div>
+                    <button
+                      onClick={() => navigate('/console/feedback')}
+                      className="flex items-center gap-2 px-5 py-3 bg-primary text-white hover:bg-primary-hover rounded-2xl font-bold text-sm transition-all active:scale-95 shrink-0"
+                    >
+                      <MessageSquare size={15} />
+                      {t('settings.feedback.viewBtn')}
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
                 <textarea
                   value={feedbackText}
                   onChange={(e) => setFeedbackText(e.target.value)}
-                  placeholder="Descreva o problema que encontrou ou a sua sugestão de melhoria..."
+                  placeholder={t('settings.feedback.placeholder')}
                   className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-4 text-body-md text-on-surface resize-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary input-inset min-h-[120px]"
                 />
                 <div className="flex items-center justify-end gap-3">
@@ -243,7 +264,7 @@ const Settings = () => {
                     className="flex items-center gap-2 px-5 py-2.5 text-text-muted hover:text-text-main font-bold text-sm transition-colors"
                   >
                     <X size={15} />
-                    Cancelar
+                    {t('settings.feedback.cancelBtn')}
                   </button>
                   <button
                     onClick={handleSendFeedback}
@@ -255,7 +276,7 @@ const Settings = () => {
                     ) : (
                       <Send size={14} />
                     )}
-                    Enviar Feedback
+                    {t('settings.feedback.sendBtn')}
                   </button>
                 </div>
               </div>

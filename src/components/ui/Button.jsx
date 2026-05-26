@@ -5,7 +5,7 @@ const variants = {
   primary:
     'bg-primary text-on-primary !text-white hover:bg-primary-deep active:brightness-95 shadow-sm border border-white/10 [&_.material-symbols-outlined]:text-inherit',
   heroOutline:
-    'bg-transparent border border-white/80 text-white hover:bg-white/10 hover:border-white [&_.material-symbols-outlined]:text-inherit',
+    'bg-transparent border border-white/80 !text-white hover:bg-white/10 hover:border-white [&_.material-symbols-outlined]:text-inherit',
   secondary:
     'bg-transparent border border-outline-variant text-primary hover:bg-surface-container-low',
   ghost:

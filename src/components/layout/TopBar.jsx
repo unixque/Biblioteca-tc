@@ -1,5 +1,6 @@
 import { useAuth } from '../../hooks/useAuth'
 import { useLanguage } from '../../context/LanguageContext'
+import { useNotification } from '../../context/NotificationContext'
 import { useSearchParams, Link, useLocation } from 'react-router-dom'
 import Select from '../ui/Select'
 import MaterialIcon from '../ui/MaterialIcon'
@@ -9,6 +10,7 @@ import { LOGO_URL } from '../../lib/staticAssets'
 const TopBar = () => {
   const { user, profile, profileLoading, isAdmin } = useAuth()
   const { t, language, setLanguage } = useLanguage()
+  const { unreadCount } = useNotification()
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
   const query = searchParams.get('q') || ''
@@ -124,7 +126,9 @@ const TopBar = () => {
               title={t('navbar.notifications')}
             >
               <MaterialIcon name="notifications" size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full border border-surface" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full border border-surface" />
+              )}
             </Link>
           )}
 

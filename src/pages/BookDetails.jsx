@@ -20,7 +20,7 @@ const BookDetails = () => {
   const location = useLocation()
   const { user, isAdmin, loading: authLoading } = useAuth()
   const { getBookById, fetchBookById, invalidateCatalog, invalidateBook } = useLibraryData()
-  const { t, translateCategory } = useLanguage()
+  const { t, translateCategory, language } = useLanguage()
   const { showToast, confirm } = useNotification()
   const [book, setBook] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -34,8 +34,38 @@ const BookDetails = () => {
   const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '' })
   const [isSubmittingReview, setIsSubmittingReview] = useState(false)
   const [showReviewForm, setShowReviewForm] = useState(false)
+  const [translatedSummary, setTranslatedSummary] = useState('')
+  const [isTranslatingSummary, setIsTranslatingSummary] = useState(false)
   const fetchInProgress = useRef(false)
   const lastFetchTime = useRef(0)
+
+  useEffect(() => {
+    const translateSummary = async () => {
+      if (!book?.ai_summary) {
+        setTranslatedSummary('')
+        return
+      }
+
+      if (language === 'pt') {
+        setTranslatedSummary(book.ai_summary)
+        return
+      }
+
+      setIsTranslatingSummary(true)
+      try {
+        const { translate } = await import('../lib/googleTranslate')
+        const result = await translate(book.ai_summary, { to: language, from: 'pt' })
+        setTranslatedSummary(result.text)
+      } catch (err) {
+        console.error('Failed to translate summary:', err)
+        setTranslatedSummary(book.ai_summary)
+      } finally {
+        setIsTranslatingSummary(false)
+      }
+    }
+
+    translateSummary()
+  }, [book?.ai_summary, language])
 
   useEffect(() => {
     const fromState = location.state?.book
@@ -141,7 +171,7 @@ const BookDetails = () => {
       if (rpcError) throw rpcError
 
       if (!data.success) {
-        showToast(data.message || 'Erro ao requisitar livro', 'error')
+        showToast(data.message || t('bookDetails.requestError'), 'error')
         setRequestStatus('error')
         return
       }
@@ -155,16 +185,16 @@ const BookDetails = () => {
         userId: user.id,
         userEmail: user.email,
         type: 'info',
-        subject: 'Reserva Registada',
-        message: `O seu pedido de reserva para o livro "${book.title}" foi recebido e aguarda aprovação. Terá 12 horas para levantar o livro na biblioteca antes que a reserva expire automaticamente.`,
-        buttonText: 'Ver os meus empréstimos',
+        subject: t('bookDetails.emailSubject'),
+        message: t('bookDetails.emailMessage').replace('{title}', book.title),
+        buttonText: t('bookDetails.emailButtonText'),
         buttonLink: `${window.location.origin}/emprestimos`
       })
 
       setRequestStatus('success')
     } catch (error) {
       console.error('Error requesting loan:', error)
-      showToast('Erro ao processar o seu pedido.', 'danger')
+      showToast(t('bookDetails.processError'), 'danger')
       setRequestStatus('error')
     } finally {
       setIsRequesting(false)
@@ -175,14 +205,15 @@ const BookDetails = () => {
     const newVal = !book.is_featured
     const { error } = await supabase.from('books').update({ is_featured: newVal }).eq('id', id)
     if (error) {
-      showToast('Erro ao actualizar destaque', 'danger')
+      showToast(t('bookDetails.featuredError'), 'danger')
     } else {
       const updated = { ...book, is_featured: newVal }
       setBook(updated)
       cacheSetBook(id, updated)
+      cacheSetBook(id, updated)
       invalidateBook(id)
       invalidateCatalog()
-      showToast(newVal ? 'Livro marcado como destaque ⭐' : 'Destaque removido', 'success')
+      showToast(newVal ? t('bookDetails.featuredAdded') : t('bookDetails.featuredRemoved'), 'success')
     }
   }
 
@@ -316,11 +347,11 @@ const BookDetails = () => {
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-secondary flex-wrap mb-8">
         <Link to="/landing" className="text-label-sm hover:text-primary transition-colors">
-          INÍCIO
+          {t('navbar.home').toUpperCase()}
         </Link>
         <MaterialIcon name="chevron_right" size={14} />
         <Link to="/catalogo" className="text-label-sm hover:text-primary transition-colors">
-          CATÁLOGO
+          {t('bookDetails.catalog').toUpperCase()}
         </Link>
         <MaterialIcon name="chevron_right" size={14} />
         <span className="text-label-sm text-on-surface truncate max-w-[200px] sm:max-w-none">
@@ -377,7 +408,7 @@ const BookDetails = () => {
             <div className="flex items-center gap-1 text-secondary ml-auto">
               <MaterialIcon name="star" size={18} filled />
               <span className="text-label-sm">
-                {averageRating > 0 ? averageRating.toFixed(1) : '—'} ({reviews.length} {reviews.length === 1 ? 'review' : 'reviews'})
+                {averageRating > 0 ? averageRating.toFixed(1) : '—'} ({reviews.length} {reviews.length === 1 ? t('bookDetails.review') : t('bookDetails.reviews')})
               </span>
             </div>
           </div>
@@ -395,10 +426,10 @@ const BookDetails = () => {
                 )}
               />
               <div>
-                <p className="text-label-sm text-secondary tracking-widest mb-1">DISPONIBILIDADE</p>
+                <p className="text-label-sm text-secondary tracking-widest mb-1">{t('bookDetails.availability').toUpperCase()}</p>
                 <p className="text-body-lg text-on-surface font-medium">
                   {isAvailable
-                    ? 'Disponível para requisição'
+                    ? t('bookDetails.availableForRequest')
                     : t('bookDetails.outOfStock')}
                 </p>
                 <p className="text-[12px] text-on-surface-variant">
@@ -412,9 +443,9 @@ const BookDetails = () => {
               <div className="flex flex-col items-center gap-1 text-center sm:text-left">
                 <div className="flex items-center gap-2 text-primary font-semibold text-label-sm">
                   <MaterialIcon name="check_circle" size={18} filled />
-                  {userHasLoan && requestStatus !== 'success' ? 'Já Requisitado' : t('bookDetails.requestedSuccess')}
+                  {userHasLoan && requestStatus !== 'success' ? t('bookDetails.alreadyRequested') : t('bookDetails.requestedSuccess')}
                 </div>
-                <span className="text-[10px] text-on-surface-variant">Aguardando aprovação do administrador</span>
+                <span className="text-[10px] text-on-surface-variant">{t('bookDetails.waitingApproval')}</span>
               </div>
             ) : (
               <Button
@@ -455,8 +486,20 @@ const BookDetails = () => {
               <MaterialIcon name="auto_awesome" size={22} />
               {book.ai_summary ? t('bookDetails.aiSummary') : t('bookDetails.aboutBook')}
             </h3>
-            <p className="text-on-surface-variant leading-relaxed">
-              {book.ai_summary || book.description || t('bookDetails.noDescription')}
+            <p className="text-on-surface-variant leading-relaxed transition-opacity duration-300">
+              {book.ai_summary ? (
+                <>
+                  {translatedSummary || book.ai_summary}
+                  {isTranslatingSummary && (
+                    <span className="block text-[12px] text-primary/70 mt-1.5 animate-pulse flex items-center gap-1.5">
+                      <span className="w-3.5 h-3.5 border-2 border-primary/30 border-t-primary rounded-full animate-spin inline-block" />
+                      {language === 'pt' ? 'A traduzir...' : 'Translating...'}
+                    </span>
+                  )}
+                </>
+              ) : (
+                book.description || t('bookDetails.noDescription')
+              )}
             </p>
             {summaryError && (
               <p className="text-error text-body-sm bg-error-container border border-error/20 px-4 py-3 rounded-none">
@@ -559,7 +602,7 @@ const BookDetails = () => {
                   </div>
                   <div className="flex-grow min-w-0">
                     <p className="text-body-md font-semibold text-on-surface">
-                      {review.profiles?.name || 'Utilizador'}
+                      {review.profiles?.name || t('bookDetails.anonymousUser')}
                       {user?.id === review.user_id && (
                         <span className="ml-2 text-[10px] bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-none uppercase tracking-wider">
                           {t('bookDetails.youReviewed')}
@@ -577,14 +620,14 @@ const BookDetails = () => {
                         type="button"
                         onClick={async () => {
                           const confirmed = await confirm({
-                            title: 'Apagar Avaliação',
-                            message: 'Tem a certeza que deseja apagar esta avaliação?',
+                            title: t('bookDetails.deleteReviewTitle'),
+                            message: t('bookDetails.deleteReviewConfirm'),
                             type: 'danger',
                           })
                           if (confirmed) {
                             const { error } = await supabase.from('reviews').delete().eq('id', review.id)
                             if (!error) {
-                              showToast('Avaliação apagada com sucesso.', 'success')
+                              showToast(t('bookDetails.deleteReviewSuccess'), 'success')
                               if (user?.id === review.user_id) {
                                 setUserReview(null)
                                 setShowReviewForm(false)
@@ -592,7 +635,7 @@ const BookDetails = () => {
                               }
                               setReviews((prev) => prev.filter((r) => r.id !== review.id))
                             } else {
-                              showToast('Erro ao apagar avaliação.', 'danger')
+                              showToast(t('bookDetails.deleteReviewError'), 'danger')
                             }
                           }
                         }}

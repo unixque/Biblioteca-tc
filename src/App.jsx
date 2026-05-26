@@ -127,15 +127,15 @@ function App() {
   }, [])
 
   return (
-    <NotificationProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <NotificationProvider>
         <LibraryDataProvider>
           <Router>
             <AppContent />
           </Router>
         </LibraryDataProvider>
-      </AuthProvider>
-    </NotificationProvider>
+      </NotificationProvider>
+    </AuthProvider>
   )
 }
 
