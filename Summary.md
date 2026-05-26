@@ -63,7 +63,7 @@ Criação automática em `AuthContext` se o perfil não existir após login.
 | `user_id`, `book_id` | FKs para `profiles` e `books` |
 | `status` | `pending` → `active` → `returned` ou `rejected` |
 | `created_at` | Início do pedido / base para expiração de 12 h |
-| `due_date` | Definida na **aprovação** (+14 dias) |
+| `due_date` | Definida na **aprovação** (+15 dias) |
 | `returned_at` | Na devolução |
 | `fine_amount` | `5` se devolução após `due_date`, senão `0` |
 
@@ -133,13 +133,13 @@ Pode existir também um job **`pg_cron`** no Supabase (não versionado aqui) par
 
 | Novo estado | Efeitos |
 |-------------|---------|
-| `active` | `due_date` = agora + **14 dias**; email de aprovação |
+| `active` | `due_date` = agora + **15 dias**; email de aprovação |
 | `rejected` | Repõe `available_qty`; email de rejeição |
 | `returned` | `returned_at` = agora; multa **5 €** se `due_date` ultrapassada; repõe stock; email de confirmação |
 
 ### Lembretes de devolução
 
-Botão na consola de empréstimos: envia email aos utilizadores com empréstimo **ativo** cuja `due_date` é **amanhã** (`notifyUser`).
+Edge Function **`send-due-reminders`** (pg_cron diário 08:00 UTC): email + notificação in-app para empréstimos **ativos** com `due_date` **amanhã**. Configuração: [`supabase/setup_email_cron.sql`](supabase/setup_email_cron.sql).
 
 ### `notifyUser` ([`src/lib/sendEmail.js`](src/lib/sendEmail.js))
 
@@ -151,7 +151,7 @@ Botão na consola de empréstimos: envia email aos utilizadores com empréstimo 
 [`supabase/functions/send-email/index.ts`](supabase/functions/send-email/index.ts)
 
 - POST para API Resend
-- Remetente: `BibliotecaTC <noreply@contact.bibliotecatc.pt>`
+- Remetente: `BibliotecaTC <noreply@bibliotecatc.com>`
 - CORS habilitado para invocação do browser
 
 ### Resumo IA (OpenAI)

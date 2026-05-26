@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { formatAuthError } from '../lib/authErrorMessage'
 import { useLanguage } from '../context/LanguageContext'
 import AuthLayout from '../components/layout/AuthLayout'
 import Input from '../components/ui/Input'
@@ -24,7 +25,7 @@ const ForgotPassword = () => {
     })
 
     setLoading(false)
-    if (err) setError(err.message)
+    if (err) setError(formatAuthError(err, t))
     else setSent(true)
   }
 

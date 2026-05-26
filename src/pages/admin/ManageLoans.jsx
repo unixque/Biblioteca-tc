@@ -110,41 +110,7 @@ const ManageLoans = () => {
 
   useRefreshOnFocus(() => fetchLoans())
 
-  // Automatic reminders for next 24 hours
-  useEffect(() => {
-    if (loans.length === 0) return
-
-    const todayStr = new Date().toISOString().split('T')[0]
-    const lastReminder = localStorage.getItem('lastReminderDate')
-
-    if (lastReminder !== todayStr) {
-      const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      const tomorrowStr = tomorrow.toISOString().split('T')[0]
-
-      const toRemind = loans.filter(l => {
-        if (l.status !== 'active' || !l.due_date) return false
-        const dueDateStr = new Date(l.due_date).toISOString().split('T')[0]
-        return dueDateStr === tomorrowStr
-      })
-
-      if (toRemind.length > 0) {
-        toRemind.forEach(async (loan) => {
-          if (!loan.profiles?.email || !loan.user_id) return
-          await notifyUser({
-            userId: loan.user_id,
-            userEmail: loan.profiles.email,
-            type: 'warning',
-            subject: 'Aviso de Devolução - 24 Horas',
-            message: `Lembramos que o livro "${loan.books?.title || ''}" deve ser devolvido nas próximas 24 horas. Por favor, entregue-o na biblioteca.`
-          })
-        })
-        console.log(`[ManageLoans] Sent ${toRemind.length} automatic 24h reminders.`)
-      }
-
-      localStorage.setItem('lastReminderDate', todayStr)
-    }
-  }, [loans])
+  // Due-date reminders are sent by Edge Function `send-due-reminders` (pg_cron daily 08:00)
 
   const updateLoanStatus = async (loanId, newStatus, bookId) => {
     const loan = loans.find(l => l.id === loanId)
@@ -159,7 +125,7 @@ const ManageLoans = () => {
     const updates = {
       status: newStatus,
       ...(newStatus === 'active' && {
-        due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+        due_date: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString()
       }),
       ...(newStatus === 'returned' && { 
         returned_at: new Date().toISOString(),
@@ -196,7 +162,9 @@ const ManageLoans = () => {
         userEmail,
         type: 'success',
         subject: 'Empréstimo Aprovado',
-        message: `O seu pedido de empréstimo para o livro "${bookTitle}" foi aprovado. O livro encontra-se disponível para levantamento.`
+        message: `O seu pedido de empréstimo para o livro "${bookTitle}" foi aprovado. O livro encontra-se disponível para levantamento.`,
+        template: 'loan_approved',
+        templateData: { bookTitle }
       })
     } else if (newStatus === 'rejected' && userId) {
       notifyUser({
@@ -204,7 +172,9 @@ const ManageLoans = () => {
         userEmail,
         type: 'error',
         subject: 'Empréstimo Rejeitado',
-        message: `O seu pedido de empréstimo para o livro "${bookTitle}" não pôde ser aprovado neste momento.`
+        message: `O seu pedido de empréstimo para o livro "${bookTitle}" não pôde ser aprovado neste momento.`,
+        template: 'loan_rejected',
+        templateData: { bookTitle }
       })
     } else if (newStatus === 'returned' && userId) {
       notifyUser({
@@ -212,7 +182,9 @@ const ManageLoans = () => {
         userEmail,
         type: 'info',
         subject: 'Livro Devolvido',
-        message: `Confirmamos a devolução do livro "${bookTitle}". Obrigado pela leitura!`
+        message: `Confirmamos a devolução do livro "${bookTitle}". Obrigado pela leitura!`,
+        template: 'loan_returned',
+        templateData: { bookTitle, fineAmount: appliedFine }
       })
     }
 

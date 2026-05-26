@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom'
 import TopBar from './TopBar'
 import MobileNav from './MobileNav'
 import Footer from '../Footer'
+
 const DashboardLayout = ({ children }) => {
   const location = useLocation()
   const showFooter = ['/', '/catalogo', '/docs'].includes(location.pathname)

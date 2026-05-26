@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
-import { User, Sun, Moon, LogOut, Save, Check, Settings as SettingsIcon, Shield, Globe, MessageSquare, Send, X } from 'lucide-react'
+import { User, Sun, Moon, LogOut, Check, Shield, MessageSquare, Send, X, Mail } from 'lucide-react'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { useLanguage } from '../context/LanguageContext'
@@ -33,6 +33,49 @@ const Settings = () => {
   const [showFeedback, setShowFeedback] = useState(false)
   const [feedbackText, setFeedbackText] = useState('')
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false)
+  const [newsletterEnabled, setNewsletterEnabled] = useState(true)
+  const [newsletterCats, setNewsletterCats] = useState(['books', 'history', 'philosophy', 'world'])
+  const [savingNewsletter, setSavingNewsletter] = useState(false)
+  const NEWSLETTER_OPTIONS = [
+    { id: 'books', labelKey: 'settings.newsletter.catBooks' },
+    { id: 'history', labelKey: 'settings.newsletter.catHistory' },
+    { id: 'philosophy', labelKey: 'settings.newsletter.catPhilosophy' },
+    { id: 'world', labelKey: 'settings.newsletter.catWorld' },
+  ]
+
+  useEffect(() => {
+    if (!user) return
+    supabase
+      .from('newsletter_preferences')
+      .select('enabled, categories')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setNewsletterEnabled(data.enabled)
+          setNewsletterCats(data.categories || newsletterCats)
+        }
+      })
+  }, [user])
+
+  const saveNewsletter = async () => {
+    if (!user) return
+    setSavingNewsletter(true)
+    await supabase.from('newsletter_preferences').upsert({
+      user_id: user.id,
+      enabled: newsletterEnabled,
+      categories: newsletterCats,
+      updated_at: new Date().toISOString(),
+    })
+    setSavingNewsletter(false)
+    showToast(t('settings.newsletter.saved'), 'success')
+  }
+
+  const toggleNewsletterCat = (id) => {
+    setNewsletterCats((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    )
+  }
 
   useEffect(() => {
     if (profile?.full_name) setDisplayName(profile.full_name)
@@ -212,6 +255,49 @@ const Settings = () => {
           </div>
         </div>
       </SettingsPanel>
+
+      {user && (
+        <SettingsPanel icon={Mail} title={t('settings.newsletter.title')}>
+          <p className="text-text-muted text-sm mb-4">{t('settings.newsletter.desc')}</p>
+          <label className="flex items-center gap-3 mb-4 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={newsletterEnabled}
+              onChange={(e) => setNewsletterEnabled(e.target.checked)}
+              className="w-4 h-4 accent-primary"
+            />
+            <span className="text-sm font-medium">{t('settings.newsletter.enabled')}</span>
+          </label>
+          <p className="text-[10px] font-extrabold uppercase tracking-widest text-text-muted mb-2">
+            {t('settings.newsletter.categories')}
+          </p>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {NEWSLETTER_OPTIONS.map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => toggleNewsletterCat(opt.id)}
+                className={cn(
+                  'px-3 py-1.5 rounded-full text-xs font-bold border transition-colors',
+                  newsletterCats.includes(opt.id)
+                    ? 'bg-primary/10 border-primary text-primary'
+                    : 'border-outline-variant text-text-muted'
+                )}
+              >
+                {t(opt.labelKey)}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={saveNewsletter}
+            disabled={savingNewsletter}
+            className="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold disabled:opacity-50"
+          >
+            {t('settings.newsletter.save')}
+          </button>
+        </SettingsPanel>
+      )}
 
       {user && (
         <SettingsPanel icon={MessageSquare} title={t('settings.feedback.title')}>

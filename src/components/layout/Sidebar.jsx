@@ -8,7 +8,8 @@ import {
   ShieldCheck,
   Tags,
   Users,
-  MessageSquare
+  MessageSquare,
+  Activity
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { clsx } from 'clsx'
@@ -31,6 +32,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { icon: Library, label: t('sidebar.loans'), path: '/console/emprestimos' },
     { icon: Users, label: t('sidebar.users'), path: '/console/utilizadores' },
     { icon: MessageSquare, label: t('sidebar.feedback'), path: '/console/feedback' },
+    { icon: Activity, label: t('sidebar.activity'), path: '/console/atividade' },
   ]
 
   const NavItem = ({ item }) => (

@@ -39,7 +39,7 @@ O design segue o sistema **Heritage Scholar**: fundo tipo papel envelhecido, tip
 | `/emprestimos` | **Os meus empréstimos** | Histórico de requisições (pendente, ativo, devolvido, rejeitado), datas de vencimento, aviso de multa, PIN de devolução (4 dígitos derivados do pedido). Requer login. |
 | `/definicoes` | **Definições** | Nome, idioma (PT/EN/ES/FR/DE/NL), tema claro/escuro, feedback, terminar sessão. |
 | `/notificacoes` | **Notificações** | Lista de avisos in-app (empréstimos, reservas, etc.). |
-| `/docs` | **Guia da biblioteca** | Regras oficiais: requisição, janela de 12 h, PIN, 14 dias de empréstimo, multas, IA, feedback. |
+| `/docs` | **Guia da biblioteca** | Regras oficiais: requisição, janela de 12 h, PIN, 15 dias de empréstimo, multas, IA, feedback. |
 
 ### Consola de administração (`/console/*`)
 
@@ -67,7 +67,7 @@ O design segue o sistema **Heritage Scholar**: fundo tipo papel envelhecido, tip
 
 ### 2. Aprovação e empréstimo
 
-1. Na consola, o admin **aprova** o pedido → estado **ativo**, `due_date` = hoje + **14 dias**.
+1. Na consola, o admin **aprova** o pedido → estado **ativo**, `due_date` = hoje + **15 dias**.
 2. O aluno é notificado por email e na app.
 3. Na devolução, o admin marca **devolvido** → stock reposto; se passou a data limite, aplica-se **multa de 5,00 €** (`fine_amount`).
 

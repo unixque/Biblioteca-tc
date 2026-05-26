@@ -10,7 +10,28 @@ export default {
     administration: 'Administration',
     settings: 'Settings',
     admin: 'Admin',
-    feedback: 'Feedback'
+    feedback: 'Feedback',
+    wishlist: 'Wishlist',
+    activity: 'Activity'
+  },
+  wishlist: {
+    title: 'Wishlist',
+    subtitle: 'Books you saved for later',
+    empty: 'No books in your wishlist yet.',
+    toggle: 'Add to wishlist',
+    added: 'Added to wishlist',
+    removed: 'Removed from wishlist',
+    error: 'Could not update wishlist'
+  },
+  aiChat: {
+    open: 'Book assistant',
+    title: 'BibliotecaTC Assistant',
+    welcome: 'Ask for book recommendations by theme or author from our catalog.',
+    placeholder: 'e.g. recommend a philosophy book...',
+    thinking: 'Thinking...',
+    viewBook: 'View book in catalog',
+    error: 'Could not get a response. Try again.',
+    noApiKey: 'Set VITE_OPENAI_API_KEY to use the assistant.'
   },
   navbar: {
     searchPlaceholder: 'Search books, authors...',
@@ -81,7 +102,19 @@ export default {
       sendBtn: 'Send Feedback',
       errorToast: 'Error sending feedback',
       successToast: 'Thank you for your feedback!'
-    }
+    },
+    newsletter: {
+      title: 'Newsletter — fun facts',
+      desc: 'Get book, history, philosophy and world facts at 8:20 on weekdays.',
+      enabled: 'Receive newsletter',
+      categories: 'Categories',
+      catBooks: 'Books',
+      catHistory: 'History',
+      catPhilosophy: 'Philosophy',
+      catWorld: 'World',
+      save: 'Save preferences',
+      saved: 'Preferences saved'
+    },
   },
   routes: {
     login: '/login',
@@ -112,6 +145,19 @@ export default {
       editOrRemove: 'EDIT OR REMOVE',
       manageLoans: 'Manage Loans',
       approveReject: 'APPROVE / REJECT'
+    },
+    activity: {
+      title: 'Activity log',
+      subtitle: 'Recent platform actions',
+      when: 'When',
+      user: 'User',
+      action: 'Action',
+      details: 'Details',
+      empty: 'No records.'
+    },
+    reports: {
+      exportPdf: 'Export PDF report',
+      popupBlocked: 'Allow pop-ups to export the report.'
     },
     login: {
       title: 'Admin Console',
@@ -305,7 +351,7 @@ export default {
     },
     duration: {
       title: '3. Borrow Duration',
-      desc: 'The standard loan period for any book in our catalog is 14 days. You will be notified one day before the deadline via email and in-app notifications.',
+      desc: 'The standard loan period for any book in our catalog is 15 days. You will be notified one day before the deadline via email and in-app notifications.',
     },
     ai: {
       title: '4. AI Descriptions',
@@ -414,8 +460,12 @@ export default {
     nextPage: 'Next page',
   },
   myLoans: {
-  title: 'My Loans',
-  subtitle: 'Complete history of your requests',
+  title: 'My Library',
+  subtitle: 'Loans and wishlist',
+  tabs: {
+    loans: 'Loans',
+    wishlist: 'Wishlist'
+  },
   emptyTitle: 'No loans',
   emptyDesc: 'You have not requested any books from our catalog yet.',
   exploreCatalog: 'Explore Catalog',
@@ -445,7 +495,9 @@ auth: {
     namePlaceholder: 'John Doe',
     signUpBtn: 'Create account',
     hasAccount: 'Already have an account?',
-    loginLink: 'Sign In'
+    loginLink: 'Sign In',
+    emailRateLimit:
+      'Authentication email rate limit reached. Wait about an hour before trying again, or ask an admin to raise the limit in Supabase (Authentication → Rate Limits).'
   },
   notifications: {
     title: 'Notifications',

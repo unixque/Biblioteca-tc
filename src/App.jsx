@@ -15,6 +15,7 @@ import Notifications from './pages/Notifications'
 import Docs from './pages/Docs'
 import Landing from './pages/Landing'
 import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import MagicLink from './pages/MagicLink'
 
 import ManageBooks from './pages/admin/ManageBooks'
@@ -25,6 +26,8 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminUsers from './pages/admin/AdminUsers'
 import ManageFeedback from './pages/admin/ManageFeedback'
+import AdminActivityLogs from './pages/admin/AdminActivityLogs'
+import AiChat from './components/AiChat'
 
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminProtectedRoute from './components/AdminProtectedRoute'
@@ -71,6 +74,7 @@ function AppContent() {
         <Route path="/console/entrar" element={<AdminLogin />} />
         <Route path="/console/login" element={<AdminLogin />} />
         <Route path="/recuperar-password" element={<ForgotPassword />} />
+        <Route path="/redefinir-password" element={<ResetPassword />} />
         <Route path="/acesso-link" element={<MagicLink />} />
 
         {/* Main app with sidebar layout */}
@@ -95,7 +99,6 @@ function AppContent() {
                 <Route path="/definicoes" element={<Settings />} />
                 <Route path="/notificacoes" element={<Notifications />} />
                 <Route path="/docs" element={<Docs />} />
-
                 {/* Admin routes — local auth guard */}
                 <Route path="/console" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
                 <Route path="/console/livros" element={<AdminProtectedRoute><ManageBooks /></AdminProtectedRoute>} />
@@ -103,6 +106,7 @@ function AppContent() {
                 <Route path="/console/emprestimos" element={<AdminProtectedRoute><ManageLoans /></AdminProtectedRoute>} />
                 <Route path="/console/utilizadores" element={<AdminProtectedRoute><AdminUsers /></AdminProtectedRoute>} />
                 <Route path="/console/feedback" element={<AdminProtectedRoute><ManageFeedback /></AdminProtectedRoute>} />
+                <Route path="/console/atividade" element={<AdminProtectedRoute><AdminActivityLogs /></AdminProtectedRoute>} />
                 <Route path="/console/livros/novo" element={<AdminProtectedRoute><BookForm /></AdminProtectedRoute>} />
                 <Route path="/console/livros/editar/:id" element={<AdminProtectedRoute><BookForm /></AdminProtectedRoute>} />
               </Routes>
@@ -132,6 +136,7 @@ function App() {
         <LibraryDataProvider>
           <Router>
             <AppContent />
+            <AiChat />
           </Router>
         </LibraryDataProvider>
       </NotificationProvider>

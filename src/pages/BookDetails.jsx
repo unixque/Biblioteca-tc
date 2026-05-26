@@ -3,7 +3,8 @@ import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
-import { Book } from 'lucide-react'
+import { Book, Heart } from 'lucide-react'
+import { useWishlist } from '../hooks/useWishlist'
 import { useLanguage } from '../context/LanguageContext'
 import { useNotification } from '../context/NotificationContext'
 import { useLibraryData } from '../context/LibraryDataContext'
@@ -22,6 +23,7 @@ const BookDetails = () => {
   const { getBookById, fetchBookById, invalidateCatalog, invalidateBook } = useLibraryData()
   const { t, translateCategory, language } = useLanguage()
   const { showToast, confirm } = useNotification()
+  const { isWishlisted, toggle: toggleWishlist } = useWishlist()
   const [book, setBook] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false)
@@ -180,15 +182,17 @@ const BookDetails = () => {
       setUserHasLoan(true)
       setBook(prev => ({ ...prev, available_qty: prev.available_qty - 1 }))
 
-      // Notify the user about their reservation
+      // Notify the user about their reservation (email + in-app notification)
       await notifyUser({
         userId: user.id,
         userEmail: user.email,
         type: 'info',
         subject: t('bookDetails.emailSubject'),
         message: t('bookDetails.emailMessage').replace('{title}', book.title),
-        buttonText: t('bookDetails.emailButtonText'),
-        buttonLink: `${window.location.origin}/emprestimos`
+        template: 'book_request_pending',
+        templateData: {
+          bookTitle: book.title,
+        }
       })
 
       setRequestStatus('success')
@@ -448,17 +452,36 @@ const BookDetails = () => {
                 <span className="text-[10px] text-on-surface-variant">{t('bookDetails.waitingApproval')}</span>
               </div>
             ) : (
-              <Button
-                variant="primary"
-                size="lg"
-                uppercase
-                icon="book"
-                onClick={handleLoan}
-                disabled={isRequesting || !isAvailable}
-                className="w-full sm:w-auto shrink-0 !text-white [&_.material-symbols-outlined]:!text-white"
-              >
-                {isRequesting ? '...' : t('bookDetails.requestBook')}
-              </Button>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                {user && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const r = await toggleWishlist(id)
+                      if (r.needsLogin) navigate('/entrar')
+                      else showToast(r.ok ? (r.added ? t('wishlist.added') : t('wishlist.removed')) : t('wishlist.error'), r.ok ? 'success' : 'danger')
+                    }}
+                    className={cn(
+                      'p-3 rounded-xl border border-outline-variant transition-colors',
+                      isWishlisted(id) ? 'text-primary bg-primary/10' : 'text-on-surface-variant hover:bg-surface-container'
+                    )}
+                    aria-label={t('wishlist.toggle')}
+                  >
+                    <Heart size={22} fill={isWishlisted(id) ? 'currentColor' : 'none'} />
+                  </button>
+                )}
+                <Button
+                  variant="primary"
+                  size="lg"
+                  uppercase
+                  icon="book"
+                  onClick={handleLoan}
+                  disabled={isRequesting || !isAvailable}
+                  className="flex-1 sm:flex-none shrink-0 !text-white [&_.material-symbols-outlined]:!text-white"
+                >
+                  {isRequesting ? '...' : t('bookDetails.requestBook')}
+                </Button>
+              </div>
             )}
           </div>
 

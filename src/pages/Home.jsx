@@ -68,10 +68,15 @@ const Home = () => {
   const filteredBooks = useMemo(
     () =>
       books.filter((b) => {
+        const q = query.toLowerCase()
         const matchesSearch =
           !query ||
-          b.title.toLowerCase().includes(query.toLowerCase()) ||
-          b.author?.toLowerCase().includes(query.toLowerCase())
+          b.title.toLowerCase().includes(q) ||
+          b.author?.toLowerCase().includes(q) ||
+          b.isbn?.toLowerCase().includes(q) ||
+          b.publisher?.toLowerCase().includes(q) ||
+          b.description?.toLowerCase().includes(q) ||
+          translateCategory(b.categories?.name || '').toLowerCase().includes(q)
         const matchesCategory =
           categoryFilter === '0' || b.category_id.toString() === categoryFilter
         return matchesSearch && matchesCategory

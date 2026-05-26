@@ -10,7 +10,28 @@ export default {
     administration: 'Administração',
     settings: 'Definições',
     admin: 'Admin',
-    feedback: 'Feedback'
+    feedback: 'Feedback',
+    wishlist: 'Favoritos',
+    activity: 'Atividade'
+  },
+  wishlist: {
+    title: 'Lista de desejos',
+    subtitle: 'Livros que guardou para ler mais tarde',
+    empty: 'Ainda não adicionou livros aos favoritos.',
+    toggle: 'Adicionar aos favoritos',
+    added: 'Adicionado aos favoritos',
+    removed: 'Removido dos favoritos',
+    error: 'Não foi possível atualizar a lista'
+  },
+  aiChat: {
+    open: 'Assistente de livros',
+    title: 'Assistente BibliotecaTC',
+    welcome: 'Pergunte que livro ler, por tema ou autor. Recomendo obras do nosso catálogo.',
+    placeholder: 'Ex: recomenda um livro de filosofia...',
+    thinking: 'A pensar...',
+    viewBook: 'Ver livro no catálogo',
+    error: 'Não consegui responder. Tente novamente.',
+    noApiKey: 'Configure VITE_OPENAI_API_KEY para usar o assistente.'
   },
   navbar: {
     searchPlaceholder: 'Pesquisar livros, autores...',
@@ -81,7 +102,19 @@ export default {
       sendBtn: 'Enviar Feedback',
       errorToast: 'Erro ao enviar feedback',
       successToast: 'Obrigado pelo seu feedback!'
-    }
+    },
+    newsletter: {
+      title: 'Newsletter — curiosidades',
+      desc: 'Receba factos sobre livros, história, filosofia e mundo às 8:20 (dias úteis).',
+      enabled: 'Receber newsletter',
+      categories: 'Categorias',
+      catBooks: 'Livros',
+      catHistory: 'História',
+      catPhilosophy: 'Filosofia',
+      catWorld: 'Mundo',
+      save: 'Guardar preferências',
+      saved: 'Preferências guardadas'
+    },
   },
   routes: {
     login: '/entrar',
@@ -112,6 +145,19 @@ export default {
       editOrRemove: 'EDITAR OU REMOVER',
       manageLoans: 'Gerir Empréstimos',
       approveReject: 'APROVAR / REJEITAR'
+    },
+    activity: {
+      title: 'Registo de atividade',
+      subtitle: 'Ações recentes na plataforma',
+      when: 'Data',
+      user: 'Utilizador',
+      action: 'Ação',
+      details: 'Detalhes',
+      empty: 'Sem registos.'
+    },
+    reports: {
+      exportPdf: 'Exportar relatório PDF',
+      popupBlocked: 'Permita pop-ups para exportar o relatório.'
     },
     login: {
       title: 'Console Admin',
@@ -305,7 +351,7 @@ export default {
     },
     duration: {
       title: '3. Duração do Empréstimo',
-      desc: 'O período normal de empréstimo para qualquer livro do nosso catálogo é de 14 dias. Será avisado um dia antes do prazo limite por e-mail e notificações na plataforma.',
+      desc: 'O período normal de empréstimo para qualquer livro do nosso catálogo é de 15 dias. Será avisado um dia antes do prazo limite por e-mail e notificações na plataforma.',
     },
     ai: {
       title: '4. Resumos por IA',
@@ -373,7 +419,7 @@ export default {
         <ul>
           <li>Cada utilizador pode ter até um (1) empréstimo ativo de cada vez;</li>
           <li>Após aprovação, o utilizador tem <strong>12 horas</strong> para levantar o livro na biblioteca física;</li>
-          <li>O prazo máximo de empréstimo é de <strong>14 dias corridos</strong> a partir da data de levantamento;</li>
+          <li>O prazo máximo de empréstimo é de <strong>15 dias corridos</strong> a partir da data de levantamento;</li>
           <li>O PIN de 4 dígitos atribuído é pessoal e intransmissível, sendo necessário para efetuar a devolução.</li>
         </ul>
 
@@ -414,8 +460,12 @@ export default {
     nextPage: 'Página seguinte',
   },
   myLoans: {
-  title: 'Meus Empréstimos',
-  subtitle: 'Histórico completo das suas requisições',
+  title: 'A Minha Biblioteca',
+  subtitle: 'Empréstimos e lista de desejos',
+  tabs: {
+    loans: 'Empréstimos',
+    wishlist: 'Lista de desejos'
+  },
   emptyTitle: 'Sem empréstimos',
   emptyDesc: 'Ainda não requisitou nenhum livro do nosso catálogo.',
   exploreCatalog: 'Explorar Catálogo',
@@ -445,7 +495,9 @@ auth: {
     namePlaceholder: 'Criança Prodígio',
     signUpBtn: 'Criar conta',
     hasAccount: 'Já tem conta?',
-    loginLink: 'Entrar'
+    loginLink: 'Entrar',
+    emailRateLimit:
+      'Limite de emails de autenticação atingido. Aguarde cerca de 1 hora antes de tentar novamente, ou peça ao administrador para aumentar o limite no Supabase (Authentication → Rate Limits).'
   },
   notifications: {
     title: 'Notificações',

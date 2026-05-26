@@ -9,15 +9,16 @@ import {
   Clock,
   AlertCircle,
   TrendingUp,
-  ChevronRight,
-  Star,
   ArrowRight,
-  Plus,
   Tags,
   ShieldCheck,
   Library,
-  MessageSquare
+  MessageSquare,
+  FileDown,
+  Activity
 } from 'lucide-react'
+import { openAdminPdfReport } from '../../lib/adminReport'
+import { useNotification } from '../../context/NotificationContext'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { useLanguage } from '../../context/LanguageContext'
@@ -44,10 +45,11 @@ const StatCard = ({ icon: Icon, label, value, color, sub }) => (
 )
 
 const AdminDashboard = () => {
-  const { signOut } = useAuth()
   const { t } = useLanguage()
+  const { showToast } = useNotification()
   const [stats, setStats] = useState({ totalBooks: 0, activeLoans: 0, pendingLoans: 0, overdueLoans: 0 })
   const [recentLoans, setRecentLoans] = useState([])
+  const [reportData, setReportData] = useState({ loans: [], books: [] })
   const [loading, setLoading] = useState(true)
   const fetchInProgress = useRef(false)
   const lastFetchTime = useRef(0)
@@ -86,12 +88,14 @@ const AdminDashboard = () => {
 
     try {
       // 1. Fetch statistics
-      const [booksRes, activeRes, pendingRes, overdueRes, recentRes] = await Promise.all([
+      const [booksRes, activeRes, pendingRes, overdueRes, recentRes, allLoansRes, allBooksRes] = await Promise.all([
         supabase.from('books').select('*', { count: 'exact', head: true }),
         supabase.from('loans').select('*', { count: 'exact', head: true }).eq('status', 'active'),
         supabase.from('loans').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('loans').select('*', { count: 'exact', head: true }).eq('status', 'active').lt('due_date', new Date().toISOString()),
-        supabase.from('loans').select('*, books!fk_loans_book(title), profiles!fk_loans_user(name, email, role)').order('id', { ascending: false }).limit(5)
+        supabase.from('loans').select('*, books!fk_loans_book(title), profiles!fk_loans_user(name, email, role)').order('id', { ascending: false }).limit(5),
+        supabase.from('loans').select('*, books!fk_loans_book(title), profiles!fk_loans_user(email)').order('id', { ascending: false }).limit(50),
+        supabase.from('books').select('title, available_qty, quantity').order('title').limit(100),
       ])
 
       if (booksRes.error) throw booksRes.error
@@ -107,6 +111,10 @@ const AdminDashboard = () => {
         overdueLoans: overdueRes.count || 0
       })
       setRecentLoans(recentRes.data || [])
+      setReportData({
+        loans: allLoansRes.data || [],
+        books: allBooksRes.data || [],
+      })
     } catch (e) {
       console.warn('[AdminDashboard] Fetch failed:', e.message || e)
       if (retryCount < 1) {
@@ -123,6 +131,27 @@ const AdminDashboard = () => {
   return (
     <div className="page-stack">
       {/* Stats */}
+      <div className="flex flex-wrap gap-3 justify-end">
+        <button
+          type="button"
+          onClick={() => {
+            const ok = openAdminPdfReport({ stats, loans: reportData.loans, books: reportData.books })
+            if (!ok) showToast(t('admin.reports.popupBlocked'), 'warning')
+          }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-container-low border border-outline-variant text-sm font-bold hover:border-primary/40 transition-colors"
+        >
+          <FileDown size={16} />
+          {t('admin.reports.exportPdf')}
+        </button>
+        <Link
+          to="/console/atividade"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-container-low border border-outline-variant text-sm font-bold hover:border-primary/40 transition-colors"
+        >
+          <Activity size={16} />
+          {t('sidebar.activity')}
+        </Link>
+      </div>
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 shrink-0">
         {loading ? (
           [...Array(4)].map((_, i) => (
