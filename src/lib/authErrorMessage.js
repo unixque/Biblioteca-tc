@@ -11,5 +11,12 @@ export function formatAuthError(error, t) {
     return t('auth.emailRateLimit')
   }
 
+  if (
+    msg.includes('hook requires authorization') ||
+    msg.includes('hook') && msg.includes('authorization')
+  ) {
+    return t('auth.hookError')
+  }
+
   return error.message
 }

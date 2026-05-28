@@ -13,7 +13,7 @@ Visão geral da stack, backend Supabase, automações e módulos do frontend. Co
 | Animações | Framer Motion |
 | Backend / Auth / DB | Supabase (PostgreSQL, Auth, Storage, Edge Functions) |
 | Email | Resend via Edge Function `send-email` |
-| IA (resumos) | OpenAI API (`gpt-4o-mini`), chamada no cliente com `VITE_OPENAI_API_KEY` |
+| IA (resumos + chat) | OpenAI via Edge Functions `ai-chat`, `book-summary` (chave só no Supabase) |
 
 **Scripts npm:** `dev`, `build`, `preview`, `lint`, `optimize-slides` (gera WebP/JPEG em `public/media/slides/`).
 
@@ -25,9 +25,9 @@ Visão geral da stack, backend Supabase, automações e módulos do frontend. Co
 |----------|-----|
 | `VITE_SUPABASE_URL` | URL do projeto Supabase |
 | `VITE_SUPABASE_ANON_KEY` | Chave pública do cliente |
-| `VITE_OPENAI_API_KEY` | Geração de resumos IA no detalhe do livro |
+**Não uses `VITE_OPENAI_API_KEY`** — ver [docs/SECURITY.md](./docs/SECURITY.md).
 
-**Edge Function `send-email`:** `RESEND_API_KEY` (definida no dashboard Supabase, não no `.env` do Vite).
+**Secrets só no Supabase:** `OPENAI_API_KEY`, `RESEND_API_KEY`, etc.
 
 ---
 

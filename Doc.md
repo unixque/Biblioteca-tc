@@ -102,3 +102,11 @@ A interface está disponível em **português**, **inglês**, **espanhol**, **fr
 ## Ligação à documentação técnica
 
 Para base de dados, funções Supabase, emails, cache e variáveis de ambiente, ver **[Summary.md](./Summary.md)**.
+
+## Apresentação do projeto
+
+Conteúdo para slides, roteiro de demo e perguntas frequentes:
+
+- **[docs/APRESENTACAO_SLIDES.md](./docs/APRESENTACAO_SLIDES.md)** — texto por slide + notas orais
+- **[docs/APRESENTACAO_DEMO.md](./docs/APRESENTACAO_DEMO.md)** — roteiro da demonstração (slide 7)
+- **[docs/APRESENTACAO_QA.md](./docs/APRESENTACAO_QA.md)** — respostas para o Q&A

@@ -31,7 +31,8 @@ export default {
     thinking: 'Thinking...',
     viewBook: 'View book in catalog',
     error: 'Could not get a response. Try again.',
-    noApiKey: 'Set VITE_OPENAI_API_KEY to use the assistant.'
+    noApiKey: 'The assistant is not available right now.',
+    loginRequired: 'Sign in to use the assistant.'
   },
   navbar: {
     searchPlaceholder: 'Search books, authors...',
@@ -497,7 +498,9 @@ auth: {
     hasAccount: 'Already have an account?',
     loginLink: 'Sign In',
     emailRateLimit:
-      'Authentication email rate limit reached. Wait about an hour before trying again, or ask an admin to raise the limit in Supabase (Authentication → Rate Limits).'
+      'Authentication email rate limit reached. Wait about an hour before trying again, or ask an admin to raise the limit in Supabase (Authentication → Rate Limits).',
+    hookError:
+      'Authentication email failed (hook). An admin must check the Send Email Hook in Supabase: authorization token (service_role), SEND_EMAIL_HOOK_SECRET, and auth-send-email deployed with --no-verify-jwt. See docs/AUTH_HOOK_TROUBLESHOOTING.md.'
   },
   notifications: {
     title: 'Notifications',

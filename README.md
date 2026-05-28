@@ -1,3 +1,13 @@
+# Biblioteca TC
+
+Portal digital da biblioteca da Escola Secundária Tomás Cabreira.
+
+- [Doc.md](./Doc.md) — produto e fluxos
+- [Summary.md](./Summary.md) — stack e backend
+- [docs/APRESENTACAO_SLIDES.md](./docs/APRESENTACAO_SLIDES.md) — conteúdo para apresentação (12 slides)
+
+---
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

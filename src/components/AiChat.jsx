@@ -4,6 +4,8 @@ import { MessageCircle, X, Send, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useLibraryData } from '../context/LibraryDataContext'
 import { useLanguage } from '../context/LanguageContext'
+import { useAuth } from '../hooks/useAuth'
+import { supabase } from '../lib/supabase'
 import { cn } from '../lib/cn'
 
 const AiChat = () => {
@@ -15,6 +17,7 @@ const AiChat = () => {
   const navigate = useNavigate()
   const { books } = useLibraryData()
   const { t, language } = useLanguage()
+  const { user } = useAuth()
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -34,41 +37,27 @@ const AiChat = () => {
     setMessages((m) => [...m, userMsg])
     setLoading(true)
 
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY
-    if (!apiKey) {
+    if (!user) {
       setMessages((m) => [
         ...m,
-        { role: 'assistant', content: t('aiChat.noApiKey') },
+        { role: 'assistant', content: t('aiChat.loginRequired') },
       ])
       setLoading(false)
       return
     }
 
-    const langNames = { pt: 'português', en: 'english', es: 'español', fr: 'français', de: 'deutsch', nl: 'nederlands' }
-
     try {
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
+      const { data, error } = await supabase.functions.invoke('ai-chat', {
+        body: {
+          message: text,
+          history: messages.map((m) => ({ role: m.role, content: m.content })),
+          catalogSnippet,
+          language,
         },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: `You are BibliotecaTC assistant for a school library. Reply in ${langNames[language] || 'português'}. Recommend books from this catalog only. When recommending, include book title and mention they can open it. Catalog:\n${catalogSnippet}`,
-            },
-            ...messages.map((m) => ({ role: m.role, content: m.content })),
-            userMsg,
-          ],
-          max_tokens: 400,
-          temperature: 0.7,
-        }),
       })
-      const data = await res.json()
-      const reply = data.choices?.[0]?.message?.content || t('aiChat.error')
+
+      if (error) throw error
+      const reply = data?.reply || data?.error || t('aiChat.error')
       const match = books.find((b) => reply.toLowerCase().includes(b.title.toLowerCase()))
       setMessages((m) => [
         ...m,
@@ -98,7 +87,7 @@ const AiChat = () => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-24 md:bottom-8 right-4 z-50 w-[min(100vw-2rem,380px)] h-[min(70vh,520px)] bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-24 md:bottom-8 right-4 left-4 sm:left-auto z-50 w-auto sm:w-[min(380px,calc(100%-2rem))] max-w-[380px] h-[min(70vh,520px)] bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-outline-variant bg-primary text-on-primary">
               <div className="flex items-center gap-2 font-bold text-sm">

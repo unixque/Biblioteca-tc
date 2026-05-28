@@ -1,48 +1,50 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { getAuthUser, isAdmin } from "../_shared/auth.ts";
+import { corsHeaders, jsonResponse } from "../_shared/cors.ts";
 import { sendResendEmail } from "../_shared/resend.ts";
 import { renderNamedTemplate, TemplateData } from "../_shared/emailTemplates.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  const auth = await getAuthUser(req);
+  if (!auth) {
+    return jsonResponse({ error: "Unauthorized" }, 401);
+  }
+
   try {
     const payload = await req.json();
+    const to = payload.to as string | undefined;
+    if (!to) {
+      return jsonResponse({ error: "to required" }, 400);
+    }
 
-    // Backwards-compatible mode: direct subject/html
+    const userEmail = auth.user.email?.toLowerCase();
+    const targetEmail = to.toLowerCase();
+    const admin = await isAdmin(auth.supabase, auth.user.id);
+
+    if (targetEmail !== userEmail && !admin) {
+      return jsonResponse({ error: "Forbidden" }, 403);
+    }
+
     if (payload.subject && payload.html) {
       const direct = await sendResendEmail({
-        to: payload.to,
+        to,
         subject: payload.subject,
         html: payload.html,
       });
       if (!direct.ok) {
-        return new Response(JSON.stringify({ error: direct.error }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 400,
-        });
+        return jsonResponse({ error: direct.error }, 400);
       }
-      return new Response(JSON.stringify({ ok: true, data: direct.data }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ ok: true, data: direct.data });
     }
 
-    // New mode: template + data
     if (!payload.template || !payload.data) {
-      return new Response(
-        JSON.stringify({
-          error:
-            "Expected either { to, subject, html } or { to, template, data }",
-        }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      return jsonResponse({
+        error: "Expected { to, template, data } or { to, subject, html }",
+      }, 400);
     }
 
     const { template, data } = payload as {
@@ -50,27 +52,19 @@ Deno.serve(async (req) => {
       data: TemplateData;
     };
 
-    const rendered = renderNamedTemplate(template as any, data);
+    const rendered = renderNamedTemplate(template as never, data);
     const result = await sendResendEmail({
-      to: payload.to,
+      to,
       subject: rendered.subject,
       html: rendered.html,
     });
 
     if (!result.ok) {
-      return new Response(JSON.stringify({ error: result.error }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      });
+      return jsonResponse({ error: result.error }, 400);
     }
 
-    return new Response(JSON.stringify({ ok: true, data: result.data }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ ok: true, data: result.data });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 400,
-    });
+    return jsonResponse({ error: String(error) }, 400);
   }
 });

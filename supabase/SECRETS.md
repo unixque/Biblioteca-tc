@@ -8,7 +8,7 @@ Set in **Supabase Dashboard → Project Settings → Edge Functions → Secrets*
 | `RESEND_FROM` | All email functions | Optional; default `BibliotecaTC <noreply@bibliotecatc.com>` |
 | `SUPABASE_URL` | Cron functions | `https://YOUR_REF.supabase.co` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Cron functions | service_role key (never put in frontend `.env`) |
-| `OPENAI_API_KEY` | `send-newsletter` | Optional; AI-generated fun facts |
+| `OPENAI_API_KEY` | `ai-chat`, `book-summary`, `send-newsletter` | Never expose as `VITE_*` on Vercel |
 | `APP_BASE_URL` | Templates | Base URL for CTA links (default `https://bibliotecatc.com`) |
 | `LOGO_URL` | Templates | Header logo URL (HTTPS) |
 | `SEND_EMAIL_HOOK_SECRET` | `auth-send-email` | From Auth Hook → **Generate secret** (`v1,whsec_...`) |
@@ -44,7 +44,9 @@ npx supabase link --project-ref YOUR_PROJECT_REF
 npx supabase secrets set RESEND_API_KEY=re_xxxxx
 npx supabase secrets set RESEND_FROM="BibliotecaTC <noreply@bibliotecatc.com>"
 
-npx supabase functions deploy send-email --no-verify-jwt
+npx supabase functions deploy send-email
+npx supabase functions deploy ai-chat
+npx supabase functions deploy book-summary
 npx supabase functions deploy send-due-reminders
 npx supabase functions deploy send-newsletter
 npx supabase functions deploy send-weekly-picks

@@ -45,9 +45,15 @@ const TopBar = () => {
     }
   }
 
+  const searchInputClass = cn(
+    'topbar-search w-full bg-surface-container-low border border-outline-variant pl-10 pr-4 text-body-md text-on-surface placeholder:text-on-surface-variant/60 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all input-inset',
+    navControlClass
+  )
+
   return (
-    <header className="sticky top-0 z-40 bg-surface border-b border-outline-variant shadow-sm shadow-primary/5">
-      <div className="max-w-container-max mx-auto flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 md:h-20 gap-4">
+    <header className="sticky top-0 z-40 bg-surface border-b border-outline-variant shadow-sm shadow-primary/5 w-full">
+      <div className="max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop">
+      <div className="flex justify-between items-center w-full min-w-0 h-16 md:h-20 gap-3 sm:gap-4">
         <div className="flex items-center gap-6 md:gap-8 shrink-0">
           <Link to={user ? '/catalogo' : '/landing'} className="flex items-center gap-2 group">
             <div className="w-8 h-8 md:w-9 md:h-9 overflow-hidden shrink-0">
@@ -79,16 +85,13 @@ const TopBar = () => {
                 placeholder={t('navbar.searchPlaceholder')}
                 value={query}
                 onChange={handleSearch}
-                className={cn(
-                  'topbar-search w-full bg-surface-container-low border border-outline-variant pl-10 pr-4 text-body-md text-on-surface placeholder:text-on-surface-variant/60 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all input-inset',
-                  navControlClass
-                )}
+                className={searchInputClass}
               />
             </>
           )}
         </div>
 
-        <div className="flex items-center gap-2 md:gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
           <div className="w-20 lg:w-28 hidden lg:block">
             <Select
               options={[
@@ -192,6 +195,25 @@ const TopBar = () => {
             </div>
           )}
         </div>
+      </div>
+
+      {isDiscoverPage && (
+        <div className="sm:hidden pb-3 relative group min-w-0">
+          <MaterialIcon
+            name="search"
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors pointer-events-none"
+          />
+          <input
+            type="search"
+            placeholder={t('navbar.searchPlaceholder')}
+            value={query}
+            onChange={handleSearch}
+            className={searchInputClass}
+            aria-label={t('navbar.searchPlaceholder')}
+          />
+        </div>
+      )}
       </div>
     </header>
   )

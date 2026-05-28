@@ -101,9 +101,8 @@ flowchart LR
 
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
-- `VITE_OPENAI_API_KEY`
 
-Do **not** put `RESEND_API_KEY` in Vercel.
+Do **not** put `RESEND_API_KEY`, `OPENAI_API_KEY`, or `service_role` in Vercel.
 
 ---
 

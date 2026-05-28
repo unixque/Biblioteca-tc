@@ -24,7 +24,7 @@ const Landing = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-surface relative">
+    <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-surface relative">
       <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
         <div className="w-24 sm:w-32">
           <Select
@@ -139,7 +139,7 @@ const Landing = () => {
                 {t('landing.aboutTitle')}
               </h2>
               <p className="text-body-lg text-on-surface-variant">{t('landing.aboutDesc')}</p>
-              <div className="flex items-center gap-12 pt-4">
+              <div className="flex flex-wrap items-center gap-8 sm:gap-12 pt-4">
                 <div className="border-l-2 border-secondary pl-4">
                   <span className="text-headline-md text-on-surface">10k+</span>
                   <p className="text-label-sm text-on-surface-variant mt-1">Livros no Acervo</p>
@@ -150,10 +150,10 @@ const Landing = () => {
                 </div>
               </div>
             </SlideIn>
-            <SlideIn direction="right" delay={0.3} className="relative">
-              <div className="relative">
+            <SlideIn direction="right" delay={0.3} className="relative min-w-0 overflow-hidden">
+              <div className="relative overflow-hidden">
                 <AboutSlideshow slides={ABOUT_SLIDES} />
-                <div className="absolute -bottom-4 -right-4 z-10 bg-primary text-on-primary px-4 py-3 rounded-lg shadow-ambient flex items-center gap-3 pointer-events-none">
+                <div className="absolute bottom-2 right-2 sm:-bottom-4 sm:-right-4 z-10 bg-primary text-on-primary px-3 py-2 sm:px-4 sm:py-3 rounded-lg shadow-ambient flex items-center gap-2 sm:gap-3 pointer-events-none max-w-[calc(100%-1rem)]">
                   <span className="text-xl font-bold font-serif">100+</span>
                   <span className="text-label-sm tracking-widest">Anos de História</span>
                 </div>

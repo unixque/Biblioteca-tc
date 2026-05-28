@@ -150,13 +150,28 @@ html.dark .topbar-search {
 }
 
 /* ─── Base ──────────────────────────────────────────────────── */
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
   font-family: var(--font-sans);
   background-color: var(--color-surface);
   color: var(--color-on-surface);
   font-size: 1rem;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 h1, h2, h3, h4, h5, h6 {

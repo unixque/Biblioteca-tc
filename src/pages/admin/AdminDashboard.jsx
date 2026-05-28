@@ -129,9 +129,9 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="page-stack">
+    <div className="page-stack w-full min-w-0">
       {/* Stats */}
-      <div className="flex flex-wrap gap-3 justify-end">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:justify-end w-full">
         <button
           type="button"
           onClick={() => {
@@ -152,7 +152,7 @@ const AdminDashboard = () => {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 shrink-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 shrink-0 w-full min-w-0">
         {loading ? (
           [...Array(4)].map((_, i) => (
             <div key={i} className="bg-surface-container-lowest p-6 md:p-8 rounded-lg shadow-card-bottom border border-outline-variant space-y-4 animate-pulse">

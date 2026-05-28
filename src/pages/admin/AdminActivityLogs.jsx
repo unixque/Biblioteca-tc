@@ -22,7 +22,7 @@ const AdminActivityLogs = () => {
   }, [])
 
   return (
-    <div className="page-stack">
+    <div className="page-stack w-full min-w-0">
       <div className="flex items-center gap-3">
         <Activity className="text-primary" size={28} />
         <div>

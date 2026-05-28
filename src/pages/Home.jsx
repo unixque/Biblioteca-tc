@@ -140,10 +140,11 @@ const Home = () => {
               </div>
             }
           />
-          <div
-            ref={recommendedRef}
-            className="flex gap-gutter overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0"
-          >
+          <div className="w-full min-w-0 overflow-x-hidden">
+            <div
+              ref={recommendedRef}
+              className="flex gap-gutter overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-1 px-1 sm:mx-0 sm:px-0"
+            >
             {showSkeleton
               ? [...Array(4)].map((_, i) => (
                   <div
@@ -159,6 +160,7 @@ const Home = () => {
                     onClick={openBook}
                   />
                 ))}
+            </div>
           </div>
         </section>
       )}
@@ -183,7 +185,7 @@ const Home = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10">
           {showSkeleton
             ? [...Array(CATALOG_PAGE_SIZE)].map((_, i) => (
                 <div key={i} className="aspect-[2/3] bg-surface-container rounded-lg animate-pulse" />

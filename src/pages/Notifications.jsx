@@ -100,7 +100,7 @@ const Notifications = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto w-full page-stack">
+    <div className="max-w-3xl mx-auto w-full min-w-0 page-stack">
       <PageHeader
         title={t('notifications.title')}
         subtitle={t('notifications.subtitle')}

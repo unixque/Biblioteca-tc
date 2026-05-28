@@ -52,20 +52,20 @@ const Docs = () => {
       id: 'privacy',
       title: t('docs.privacy.title'),
       content: (
-        <div className="text-body-lg text-on-surface-variant pr-content" dangerouslySetInnerHTML={{ __html: t('docs.privacy.content') }} />
+        <div className="text-body-lg text-on-surface-variant pr-content break-words overflow-x-auto" dangerouslySetInnerHTML={{ __html: t('docs.privacy.content') }} />
       ),
     },
     {
       id: 'terms',
       title: t('docs.terms.title'),
       content: (
-        <div className="text-body-lg text-on-surface-variant pr-content" dangerouslySetInnerHTML={{ __html: t('docs.terms.content') }} />
+        <div className="text-body-lg text-on-surface-variant pr-content break-words overflow-x-auto" dangerouslySetInnerHTML={{ __html: t('docs.terms.content') }} />
       ),
     },
   ];
 
   return (
-    <div className="max-w-3xl mx-auto w-full page-stack">
+    <div className="max-w-3xl mx-auto w-full min-w-0 page-stack">
       <PageHeader title={t('docs.title')} subtitle={t('docs.subtitle')} />
       <Accordion items={accordionItems} defaultOpenId={defaultOpenId} />
     </div>

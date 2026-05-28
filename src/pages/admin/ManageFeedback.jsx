@@ -31,7 +31,7 @@ const ManageFeedback = () => {
   }
 
   return (
-    <div className="page-stack">
+    <div className="page-stack w-full min-w-0">
       <div className="space-y-1">
         <h1 className="text-4xl font-black text-text-main tracking-tight">{t('admin.feedback.title')}</h1>
         <p className="text-text-muted text-lg font-medium mt-1">{t('admin.feedback.subtitle')}</p>

@@ -31,7 +31,8 @@ export default {
     thinking: 'A pensar...',
     viewBook: 'Ver livro no catálogo',
     error: 'Não consegui responder. Tente novamente.',
-    noApiKey: 'Configure VITE_OPENAI_API_KEY para usar o assistente.'
+    noApiKey: 'O assistente não está disponível de momento.',
+    loginRequired: 'Inicie sessão para usar o assistente.'
   },
   navbar: {
     searchPlaceholder: 'Pesquisar livros, autores...',
@@ -497,7 +498,9 @@ auth: {
     hasAccount: 'Já tem conta?',
     loginLink: 'Entrar',
     emailRateLimit:
-      'Limite de emails de autenticação atingido. Aguarde cerca de 1 hora antes de tentar novamente, ou peça ao administrador para aumentar o limite no Supabase (Authentication → Rate Limits).'
+      'Limite de emails de autenticação atingido. Aguarde cerca de 1 hora antes de tentar novamente, ou peça ao administrador para aumentar o limite no Supabase (Authentication → Rate Limits).',
+    hookError:
+      'O envio de email de autenticação falhou (hook). O administrador deve verificar o Send Email Hook no Supabase: token de autorização (service_role), segredo SEND_EMAIL_HOOK_SECRET e deploy de auth-send-email com --no-verify-jwt. Ver docs/AUTH_HOOK_TROUBLESHOOTING.md.'
   },
   notifications: {
     title: 'Notificações',

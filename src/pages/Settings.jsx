@@ -144,7 +144,7 @@ const Settings = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto w-full page-stack">
+    <div className="max-w-3xl mx-auto w-full min-w-0 page-stack">
       <PageHeader title={t('settings.title')} subtitle={t('settings.subtitle')} />
 
       {user && (
@@ -190,7 +190,7 @@ const Settings = () => {
 
         <div>
           <p className="text-label-sm text-on-surface-variant mb-4">{t('settings.theme')}</p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Light */}
             <button
               onClick={() => setTheme('light')}

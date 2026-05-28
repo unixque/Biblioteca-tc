@@ -263,44 +263,28 @@ const BookDetails = () => {
     setIsGeneratingSummary(true)
     setSummaryError(null)
 
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY
-    if (!apiKey) {
-      setSummaryError('A chave de API OpenAI não está configurada. Adicione VITE_OPENAI_API_KEY ao ficheiro .env')
+    if (!isAdmin) {
+      setSummaryError('Apenas administradores podem gerar resumos IA.')
       setIsGeneratingSummary(false)
       return
     }
 
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+      const { data, error } = await supabase.functions.invoke('book-summary', {
+        body: {
+          bookId: id,
+          title: book.title,
+          author: book.author,
         },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'user',
-              content: `Escreve um resumo curto e cativante em português (3-4 frases) do livro "${book.title}" de ${book.author}. Foca-te no tema central e no que o livro tem de especial para os leitores. Não uses aspas nem formatação especial.`
-            }
-          ],
-          max_tokens: 200,
-          temperature: 0.7
-        })
       })
 
-      if (!response.ok) {
-        const err = await response.json()
-        throw new Error(err.error?.message || 'Erro na API OpenAI')
-      }
+      if (error) throw error
+      if (data?.error) throw new Error(data.error)
 
-      const data = await response.json()
-      const summary = data.choices[0]?.message?.content?.trim()
-
+      const summary = data?.summary?.trim()
       if (summary) {
-        await supabase.from('books').update({ ai_summary: summary }).eq('id', id)
-        setBook(prev => ({ ...prev, ai_summary: summary }))
+        setBook((prev) => ({ ...prev, ai_summary: summary }))
+        invalidateBook(id)
       }
     } catch (error) {
       console.error('OpenAI error:', error)
@@ -311,7 +295,7 @@ const BookDetails = () => {
   }
 
   if (loading && !book) return (
-    <div className="animate-pulse page-stack max-w-container-max mx-auto w-full">
+    <div className="animate-pulse page-stack w-full min-w-0">
       <div className="h-4 w-48 bg-surface-container rounded-none mb-8" />
       <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter">
         <div className="md:col-span-4 aspect-[3/4] bg-surface-container rounded-lg" />
@@ -347,7 +331,7 @@ const BookDetails = () => {
   }
 
   return (
-    <div className="max-w-container-max mx-auto w-full page-stack">
+    <div className="w-full min-w-0 page-stack">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-secondary flex-wrap mb-8">
         <Link to="/landing" className="text-label-sm hover:text-primary transition-colors">
@@ -365,8 +349,8 @@ const BookDetails = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter mb-section-gap">
         {/* Cover column */}
-        <div className="md:col-span-4 self-start">
-          <div className="relative w-full group">
+        <div className="md:col-span-4 self-start min-w-0">
+          <div className="relative w-full max-w-sm mx-auto md:max-w-none md:mx-0 group overflow-hidden md:overflow-visible">
             <div className="aspect-[3/4] rounded-lg overflow-hidden book-shadow border border-outline-variant bg-surface-container relative z-10">
               <img
                 src={book.cover_url}
@@ -375,7 +359,7 @@ const BookDetails = () => {
               />
               <div className="absolute inset-0 bg-primary opacity-[0.02] mix-blend-multiply pointer-events-none" />
             </div>
-            <div className="absolute -bottom-4 -left-4 right-4 top-4 bg-surface-container-high rounded-lg z-0 border border-outline-variant" />
+            <div className="hidden md:block absolute -bottom-4 -left-4 right-4 top-4 bg-surface-container-high rounded-lg z-0 border border-outline-variant" />
             {isAdmin && (
             <div className="absolute top-4 right-4 flex gap-2 z-20">
               <Link
@@ -402,7 +386,7 @@ const BookDetails = () => {
         </div>
 
         {/* Content column */}
-        <div className="md:col-span-8 flex flex-col justify-center md:pl-8 mt-8 md:mt-0">
+        <div className="md:col-span-8 flex flex-col justify-center md:pl-8 mt-8 md:mt-0 min-w-0">
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             {book.category_name && (
               <span className="inline-flex items-center px-3 py-1 rounded-none bg-secondary-container text-on-secondary-container text-label-sm border border-secondary">
@@ -421,7 +405,7 @@ const BookDetails = () => {
           <p className="text-headline-sm text-on-surface-variant italic mb-6">{book.author}</p>
 
           {/* Glass availability panel */}
-          <div className="glass-panel p-6 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-6 mb-12">
+          <div className="glass-panel p-4 sm:p-6 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 sm:gap-6 mb-8 sm:mb-12 w-full min-w-0">
             <div className="flex items-center gap-4">
               <div
                 className={cn(
@@ -529,7 +513,7 @@ const BookDetails = () => {
                 {summaryError}
               </p>
             )}
-            {!book.ai_summary && (
+            {!book.ai_summary && isAdmin && (
               <button
                 type="button"
                 onClick={handleGenerateSummary}

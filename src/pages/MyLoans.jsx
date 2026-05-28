@@ -94,10 +94,10 @@ const MyLoans = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto w-full page-stack">
+    <div className="max-w-4xl mx-auto w-full min-w-0 page-stack">
       <PageHeader title={t('myLoans.title')} subtitle={t('myLoans.subtitle')} />
 
-      <div className="flex gap-2 p-1 bg-surface-container-low rounded-xl border border-outline-variant w-fit">
+      <div className="flex flex-wrap gap-2 p-1 bg-surface-container-low rounded-xl border border-outline-variant w-full sm:w-fit">
         <button
           type="button"
           onClick={() => setTab('loans')}
@@ -161,7 +161,7 @@ const MyLoans = () => {
           {loans.map((loan) => (
             <div
               key={loan.id}
-              className="bg-surface-container-lowest border border-outline-variant p-6 md:p-8 rounded-lg flex flex-col md:flex-row items-center gap-6 group hover:border-primary/30 transition-colors shadow-card-bottom"
+              className="bg-surface-container-lowest border border-outline-variant p-4 sm:p-6 md:p-8 rounded-lg flex flex-col md:flex-row items-center gap-4 sm:gap-6 group hover:border-primary/30 transition-colors shadow-card-bottom w-full min-w-0"
             >
               <div className="w-16 aspect-[2/3] bg-surface-container rounded overflow-hidden flex-shrink-0 border border-outline-variant">
                 {loan.books?.cover_image && (
@@ -173,10 +173,10 @@ const MyLoans = () => {
                 )}
               </div>
 
-              <div className="flex-grow text-center md:text-left space-y-1">
+              <div className="flex-grow min-w-0 text-center md:text-left space-y-1 w-full">
                 <Link
                   to={`/livro/${loan.books?.id}`}
-                  className="text-lg font-bold hover:text-primary transition-colors flex items-center justify-center md:justify-start gap-2"
+                  className="text-lg font-bold hover:text-primary transition-colors flex items-center justify-center md:justify-start gap-2 break-words"
                 >
                   {loan.books?.title}
                   <ArrowRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />

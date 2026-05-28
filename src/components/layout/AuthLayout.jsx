@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import PageContainer from '../ui/PageContainer'
 
 const AuthLayout = ({ children, title, subtitle }) => (
-  <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 md:p-12">
+  <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-background flex flex-col items-center justify-center p-4 md:p-12">
     <div className="text-center mb-8">
       <h1 className="text-display-lg-mobile md:text-display-lg text-primary mb-2">
         Biblioteca TC
@@ -12,7 +12,7 @@ const AuthLayout = ({ children, title, subtitle }) => (
       </p>
     </div>
 
-    <div className="w-full max-w-md bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-ambient relative overflow-hidden">
+    <div className="w-full max-w-md min-w-0 bg-surface-container-lowest border border-outline-variant rounded-xl p-6 sm:p-8 shadow-ambient relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
       <header className="mb-8 text-center mt-2">
         <h2 className="text-headline-md text-primary">{title}</h2>

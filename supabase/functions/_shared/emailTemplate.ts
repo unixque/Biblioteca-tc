@@ -67,8 +67,8 @@ export function renderEmailTemplate(props: EmailTemplateProps): {
           .map(
             (row) => `
         <tr>
-          <td style="padding:4px 0;font-size:13px;color:#6b7280;">${row.label}</td>
-          <td style="padding:4px 0;font-size:13px;color:#111827;font-weight:500;text-align:right;">${row.value}</td>
+          <td style="padding:4px 0;font-size:13px;color:#6b7280;">${escapeHtml(row.label)}</td>
+          <td style="padding:4px 0;font-size:13px;color:#111827;font-weight:500;text-align:right;">${escapeHtml(row.value)}</td>
         </tr>`
           )
           .join("")
@@ -115,7 +115,7 @@ export function renderEmailTemplate(props: EmailTemplateProps): {
                 ${
                   lead
                     ? `<p style="margin:0 0 12px 0;font-size:14px;line-height:1.5;color:#4b5563;">
-                        ${escapeHtml(lead)}
+                        ${lead}
                       </p>`
                     : ""
                 }
@@ -158,7 +158,7 @@ export function renderEmailTemplate(props: EmailTemplateProps): {
                 ${
                   footerHint
                     ? `<p style="margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-size:11px;color:#9ca3af;">
-                        ${footerHint}
+                        ${escapeHtml(footerHint)}
                       </p>`
                     : ""
                 }
@@ -174,7 +174,8 @@ export function renderEmailTemplate(props: EmailTemplateProps): {
   return { subject, html };
 }
 
-function escapeHtml(str: string): string {
+/** Escape user-provided text; wrap with <strong> in templates after escaping. */
+export function escapeHtml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")

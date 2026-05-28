@@ -7,10 +7,17 @@ const widths = {
   wide: 'max-w-5xl',
 }
 
-const PageContainer = ({ children, className, as: Comp = 'div', size = 'full' }) => (
+const PageContainer = ({
+  children,
+  className,
+  as: Comp = 'div',
+  size = 'full',
+  noPadding = false,
+}) => (
   <Comp
     className={cn(
-      'mx-auto w-full px-margin-mobile md:px-margin-desktop',
+      'mx-auto w-full min-w-0',
+      !noPadding && 'px-margin-mobile md:px-margin-desktop',
       widths[size] ?? widths.full,
       className
     )}

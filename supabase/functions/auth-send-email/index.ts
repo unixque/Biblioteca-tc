@@ -81,7 +81,12 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error("auth-send-email:", error);
     const message = error instanceof Error ? error.message : String(error);
-    return hookError(message, 401);
+    // 401 makes GoTrue show "Hook requires authorization token" even for webhook mismatch
+    const status = message.toLowerCase().includes("signature") ||
+        message.toLowerCase().includes("webhook")
+      ? 500
+      : 401;
+    return hookError(message, status);
   }
 });
 

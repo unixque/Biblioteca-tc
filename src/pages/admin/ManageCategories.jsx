@@ -136,7 +136,7 @@ const ManageCategories = () => {
   
 
   return (
-    <div className="page-stack">
+    <div className="page-stack w-full min-w-0">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
           <h1 className="text-4xl font-black text-text-main tracking-tight">{t('admin.categories.title')}</h1>

@@ -1,5 +1,9 @@
 import { APP_BASE_URL } from "./resend.ts";
-import { EmailTemplateProps, renderEmailTemplate } from "./emailTemplate.ts";
+import {
+  EmailTemplateProps,
+  escapeHtml,
+  renderEmailTemplate,
+} from "./emailTemplate.ts";
 
 type TemplateKey =
   | "book_request_pending"
@@ -35,6 +39,9 @@ export function renderNamedTemplate(key: TemplateKey, data: TemplateData) {
 function mapTemplate(key: TemplateKey, data: TemplateData): EmailTemplateProps {
   const loansUrl = `${APP_BASE_URL}/emprestimos`;
   const settingsUrl = `${APP_BASE_URL}/definicoes`;
+  const book = escapeHtml(data.bookTitle ?? "");
+  const pickTitle = escapeHtml(data.pickTitle ?? "");
+  const pickAuthor = data.pickAuthor ? escapeHtml(data.pickAuthor) : "";
 
   switch (key) {
     case "book_request_pending":
@@ -50,7 +57,7 @@ function mapTemplate(key: TemplateKey, data: TemplateData): EmailTemplateProps {
       return {
         subject: `Empréstimo aprovado — ${data.bookTitle ?? ""}`.trim(),
         title: "O seu empréstimo foi aprovado",
-        lead: `O livro <strong>${data.bookTitle ?? ""}</strong> está pronto para levantamento.`,
+        lead: `O livro <strong>${book}</strong> está pronto para levantamento.`,
         body: "Obrigado por utilizar a BibliotecaTC. Entregue o livro até à data limite indicada na sua área de empréstimos.",
         cta: { label: "Ver empréstimo", url: loansUrl },
       };
@@ -59,7 +66,7 @@ function mapTemplate(key: TemplateKey, data: TemplateData): EmailTemplateProps {
       return {
         subject: `Empréstimo rejeitado — ${data.bookTitle ?? ""}`.trim(),
         title: "O seu pedido não pôde ser aprovado",
-        lead: `O pedido para o livro <strong>${data.bookTitle ?? ""}</strong> foi rejeitado.`,
+        lead: `O pedido para o livro <strong>${book}</strong> foi rejeitado.`,
         body: "Pode tentar novamente mais tarde ou escolher outro título do catálogo.",
         cta: { label: "A Minha Biblioteca", url: loansUrl },
       };
@@ -68,7 +75,7 @@ function mapTemplate(key: TemplateKey, data: TemplateData): EmailTemplateProps {
       return {
         subject: `Livro devolvido — ${data.bookTitle ?? ""}`.trim(),
         title: "Devolução registada",
-        lead: `Confirmámos a devolução do livro <strong>${data.bookTitle ?? ""}</strong>.`,
+        lead: `Confirmámos a devolução do livro <strong>${book}</strong>.`,
         body:
           data.fineAmount && data.fineAmount > 0
             ? `Existe uma multa associada de <strong>${data.fineAmount.toFixed(
@@ -83,7 +90,7 @@ function mapTemplate(key: TemplateKey, data: TemplateData): EmailTemplateProps {
         subject: `Devolução amanhã — ${data.bookTitle ?? ""}`.trim(),
         title: "Lembrete de devolução",
         badge: { kind: "warning", text: "Prazo a terminar" },
-        lead: `O livro <strong>${data.bookTitle ?? ""}</strong> deve ser devolvido amanhã.`,
+        lead: `O livro <strong>${book}</strong> deve ser devolvido amanhã.`,
         body:
           "Evite multas entregando o livro dentro do prazo. Pode consultar o PIN e a data limite em A Minha Biblioteca.",
         details: data.dueDate
@@ -96,7 +103,7 @@ function mapTemplate(key: TemplateKey, data: TemplateData): EmailTemplateProps {
       return {
         subject: "Curiosidade do dia — BibliotecaTC",
         title: "Curiosidade do dia",
-        lead: data.fact ?? "",
+        lead: escapeHtml(data.fact ?? ""),
         footerHint:
           "Gerir subscrição em Definições → Newsletter, na aplicação BibliotecaTC.",
         cta: { label: "Gerir preferências", url: settingsUrl },
@@ -106,8 +113,8 @@ function mapTemplate(key: TemplateKey, data: TemplateData): EmailTemplateProps {
       return {
         subject: "Recomendação da semana — BibliotecaTC",
         title: "Recomendação da semana",
-        lead: `<strong>${data.pickTitle ?? ""}</strong>${
-          data.pickAuthor ? ` — ${data.pickAuthor}` : ""
+        lead: `<strong>${pickTitle}</strong>${
+          pickAuthor ? ` — ${pickAuthor}` : ""
         }`,
         body:
           "Descubra este título recomendado pela BibliotecaTC. Verifique a disponibilidade e faça a sua reserva.",

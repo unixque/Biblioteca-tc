@@ -129,7 +129,7 @@ const BookForm = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto w-full page-stack">
+    <div className="max-w-5xl mx-auto w-full min-w-0 page-stack">
       <div className="flex items-center gap-6">
         <button 
           onClick={() => navigate(-1)} 
