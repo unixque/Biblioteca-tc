@@ -1,7 +1,5 @@
 # Biblioteca TC — Conteúdo para slides
 
-**Para Gamma AI:** usa o outline em [`APRESENTACAO_GAMMA_OUTLINE.md`](./APRESENTACAO_GAMMA_OUTLINE.md) (copiar e colar no Gamma → Generate from outline).
-
 Copiar cada secção para um slide no PowerPoint ou Google Slides.  
 **Duração sugerida:** 12–15 min + perguntas · **URL:** bibliotecatc.com
 

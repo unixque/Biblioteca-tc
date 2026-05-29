@@ -7,6 +7,7 @@ import AuthLayout from '../components/layout/AuthLayout'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
 import MaterialIcon from '../components/ui/MaterialIcon'
+import { normalizeAuthEmail } from '../lib/authIdentifier'
 
 const Login = () => {
   const [identifier, setIdentifier] = useState('')
@@ -21,7 +22,10 @@ const Login = () => {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    const { data, error: signInError } = await signIn({ email: identifier, password })
+    const { data, error: signInError } = await signIn({
+      email: normalizeAuthEmail(identifier),
+      password,
+    })
     if (signInError) {
       setError(signInError.message)
       setLoading(false)
