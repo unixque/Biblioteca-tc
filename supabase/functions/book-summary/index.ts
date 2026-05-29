@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { getAuthUser, isAdmin } from "../_shared/auth.ts";
+import { getAuthUser } from "../_shared/auth.ts";
 import { corsHeaders, jsonResponse } from "../_shared/cors.ts";
 import { chatCompletion } from "../_shared/openai.ts";
 
@@ -12,11 +12,6 @@ Deno.serve(async (req) => {
   const auth = await getAuthUser(req);
   if (!auth) {
     return jsonResponse({ error: "Unauthorized" }, 401);
-  }
-
-  const admin = await isAdmin(auth.supabase, auth.user.id);
-  if (!admin) {
-    return jsonResponse({ error: "Admin only" }, 403);
   }
 
   try {

@@ -5,6 +5,7 @@ import de from '../locales/de'
 import fr from '../locales/fr'
 import es from '../locales/es'
 import nl from '../locales/nl'
+import { translateWithFallback } from '../lib/i18n'
 
 const dicts = { pt, en, de, fr, es, nl }
 
@@ -73,19 +74,10 @@ export const LanguageProvider = ({ children }) => {
   }, [language])
 
   const t = (key) => {
-    const dictionary = dicts[language] || dicts.pt
-    const keys = key.split('.')
-    let translation = dictionary
-    
-    for (const k of keys) {
-      if (translation[k] === undefined) {
-        console.warn(`Translation missing for key: ${key}`)
-        return key // fallback to key
-      }
-      translation = translation[k]
-    }
-    
-    return translation
+    const text = translateWithFallback(dicts, language, key)
+    if (text !== undefined) return text
+    console.warn(`Translation missing for key: ${key} (lang: ${language})`)
+    return key
   }
 
   const translateCategory = (catName) => {

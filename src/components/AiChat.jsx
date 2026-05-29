@@ -7,6 +7,9 @@ import { useLanguage } from '../context/LanguageContext'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { cn } from '../lib/cn'
+import { getEdgeFunctionErrorMessage, isOpenAiConfigError } from '../lib/edgeFunctionError'
+import { findBookMentionedInText } from '../lib/catalogSnippet'
+import ChatMarkdown from './ChatMarkdown'
 
 const AiChat = () => {
   const [open, setOpen] = useState(false)
@@ -22,12 +25,6 @@ const AiChat = () => {
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
-
-  const catalogSnippet = books
-    .filter((b) => b.available_qty > 0)
-    .slice(0, 80)
-    .map((b) => `- ${b.title} (${b.author || '?'}) [id:${b.id}] cat:${b.categories?.name || ''}`)
-    .join('\n')
 
   const send = async () => {
     const text = input.trim()
@@ -51,19 +48,55 @@ const AiChat = () => {
         body: {
           message: text,
           history: messages.map((m) => ({ role: m.role, content: m.content })),
-          catalogSnippet,
           language,
         },
       })
 
-      if (error) throw error
-      const reply = data?.reply || data?.error || t('aiChat.error')
-      const match = books.find((b) => reply.toLowerCase().includes(b.title.toLowerCase()))
+      if (data?.error) {
+        const serverMsg = String(data.error)
+        setMessages((m) => [
+          ...m,
+          {
+            role: 'assistant',
+            content: isOpenAiConfigError(serverMsg) ? t('aiChat.noApiKey') : serverMsg,
+          },
+        ])
+        return
+      }
+
+      if (error) {
+        const detail = await getEdgeFunctionErrorMessage(error, data)
+        const unauthorized =
+          detail?.toLowerCase().includes('unauthorized') ||
+          error?.context?.status === 401
+        setMessages((m) => [
+          ...m,
+          {
+            role: 'assistant',
+            content: unauthorized
+              ? t('aiChat.loginRequired')
+              : isOpenAiConfigError(detail)
+                ? t('aiChat.noApiKey')
+                : detail || t('aiChat.error'),
+          },
+        ])
+        return
+      }
+
+      const reply = data?.reply?.trim()
+      if (!reply) {
+        setMessages((m) => [...m, { role: 'assistant', content: t('aiChat.error') }])
+        return
+      }
+
+      const matched = findBookMentionedInText(reply, books)
+      const ids = data?.bookIds?.length ? data.bookIds : matched ? [matched.id] : []
       setMessages((m) => [
         ...m,
-        { role: 'assistant', content: reply, bookId: match?.id },
+        { role: 'assistant', content: reply, bookIds: ids },
       ])
-    } catch {
+    } catch (err) {
+      console.error('ai-chat error:', err)
       setMessages((m) => [...m, { role: 'assistant', content: t('aiChat.error') }])
     } finally {
       setLoading(false)
@@ -113,18 +146,30 @@ const AiChat = () => {
                       : 'bg-surface-container text-on-surface-variant'
                   )}
                 >
-                  {msg.content}
-                  {msg.bookId && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOpen(false)
-                        navigate(`/livro/${msg.bookId}`)
-                      }}
-                      className="block mt-2 text-primary font-semibold text-xs"
-                    >
-                      {t('aiChat.viewBook')}
-                    </button>
+                  {msg.role === 'assistant' ? (
+                    <ChatMarkdown text={msg.content} />
+                  ) : (
+                    msg.content
+                  )}
+                  {msg.bookIds?.length > 0 && (
+                    <div className="mt-2 flex flex-col gap-1">
+                      {msg.bookIds.slice(0, 3).map((id) => {
+                        const title = books.find((b) => String(b.id) === String(id))?.title
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => {
+                              setOpen(false)
+                              navigate(`/livro/${id}`)
+                            }}
+                            className="text-left text-primary font-semibold text-xs hover:underline"
+                          >
+                            {title ? `→ ${title}` : t('aiChat.viewBook')}
+                          </button>
+                        )
+                      })}
+                    </div>
                   )}
                 </div>
               ))}

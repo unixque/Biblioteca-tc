@@ -20,7 +20,7 @@
 ## Funções protegidas
 
 - **`ai-chat`** — requer utilizador autenticado (JWT).
-- **`book-summary`** — requer admin (`profiles.role = admin`).
+- **`book-summary`** — requer utilizador autenticado (JWT); grava `books.ai_summary` via service role.
 - **`send-email`** — requer JWT; só pode enviar para o próprio email, exceto admins.
 
 Deploy **com verificação JWT** (sem `--no-verify-jwt`), exceto `auth-send-email`.

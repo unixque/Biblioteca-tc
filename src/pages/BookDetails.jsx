@@ -40,6 +40,7 @@ const BookDetails = () => {
   const [isTranslatingSummary, setIsTranslatingSummary] = useState(false)
   const fetchInProgress = useRef(false)
   const lastFetchTime = useRef(0)
+  const hasAiSummary = Boolean(book?.ai_summary?.trim())
 
   useEffect(() => {
     const translateSummary = async () => {
@@ -263,8 +264,8 @@ const BookDetails = () => {
     setIsGeneratingSummary(true)
     setSummaryError(null)
 
-    if (!isAdmin) {
-      setSummaryError('Apenas administradores podem gerar resumos IA.')
+    if (!user) {
+      setSummaryError(t('bookDetails.generateSummaryLogin'))
       setIsGeneratingSummary(false)
       return
     }
@@ -505,7 +506,8 @@ const BookDetails = () => {
                   )}
                 </>
               ) : (
-                book.description || t('bookDetails.noDescription')
+                book.description ||
+                (user ? t('bookDetails.noDescription') : t('bookDetails.noDescriptionGuest'))
               )}
             </p>
             {summaryError && (
@@ -513,20 +515,26 @@ const BookDetails = () => {
                 {summaryError}
               </p>
             )}
-            {!book.ai_summary && isAdmin && (
-              <button
-                type="button"
-                onClick={handleGenerateSummary}
-                disabled={isGeneratingSummary}
-                className="flex items-center gap-1.5 text-primary text-label-sm hover:underline disabled:opacity-50"
-              >
-                {isGeneratingSummary ? (
-                  <span className="w-3.5 h-3.5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                ) : (
-                  <MaterialIcon name="auto_awesome" size={14} />
-                )}
-                {isGeneratingSummary ? t('bookDetails.generatingAiSummary') : t('bookDetails.generateAiSummary')}
-              </button>
+            {!hasAiSummary && !authLoading && (
+              user ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  icon="auto_awesome"
+                  onClick={handleGenerateSummary}
+                  disabled={isGeneratingSummary}
+                  className="w-full sm:w-auto"
+                >
+                  {isGeneratingSummary ? t('bookDetails.generatingAiSummary') : t('bookDetails.generateAiSummary')}
+                </Button>
+              ) : (
+                <Link to="/entrar">
+                  <Button type="button" variant="secondary" size="sm" icon="login">
+                    {t('bookDetails.generateSummaryLogin')}
+                  </Button>
+                </Link>
+              )
             )}
           </div>
 
